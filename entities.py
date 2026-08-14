@@ -1,12 +1,10 @@
 """
 entities.py
 Declarative configuration for the generic CRUD screens, one entry per table.
-This mirrors the original app's `ENTITIES` JS object: each entity carries
-the SQL to list rows, the columns to show, the fields for the add/edit
-form (including foreign-key dropdowns), and which fields are searchable.
+Updated for MariaDB compatibility (CONCAT instead of ||).
 """
 
-from datetime import date, timedelta
+from datetime import date
 
 
 def is_soon_or_expired(date_str, days=60):
@@ -28,19 +26,19 @@ def expiry_label(date_str):
         return str(date_str)
     diff = (d - date.today()).days
     if diff < 0:
-        return f"\U0001F534 {date_str} (expired {abs(diff)}d ago)"
+        return f"🔴 {date_str} (expired {abs(diff)}d ago)"
     if diff <= 60:
-        return f"\U0001F7E0 {date_str} ({diff}d left)"
-    return f"\u2705 {date_str}"
+        return f"🟠 {date_str} ({diff}d left)"
+    return f"✅ {date_str}"
 
 
 def stock_label(qty):
     qty = qty or 0
     if qty == 0:
-        return f"\U0001F534 {qty}"
+        return f"🔴 {qty}"
     if qty < 10:
-        return f"\U0001F7E0 {qty}"
-    return f"\u2705 {qty}"
+        return f"🟠 {qty}"
+    return f"✅ {qty}"
 
 
 ENTITIES = {
@@ -65,7 +63,7 @@ ENTITIES = {
         "search_keys": ["MedicineName", "Category", "Dosage", "SupplierName"],
         "filters": [
             {"key": "low", "label": "Low stock (<10)", "test": lambda r: (r.get("StockQuantity") or 0) < 10},
-            {"key": "exp", "label": "Expiring \u2264 60 days", "test": lambda r: is_soon_or_expired(r.get("ExpiryDate"))},
+            {"key": "exp", "label": "Expiring ≤ 60 days", "test": lambda r: is_soon_or_expired(r.get("ExpiryDate"))},
         ],
         "fields": [
             {"key": "MedicineName", "label": "Medicine name", "type": "text", "required": True},
@@ -157,7 +155,7 @@ ENTITIES = {
         "title": "Prescriptions",
         "desc": "One row per prescription written for a customer by a pharmacist.",
         "list_sql": """SELECT p.PrescriptionID, p.PrescriptionDate, p.DosageInstructions, p.Duration,
-                              (c.FirstName || ' ' || c.LastName) AS CustomerName, ph.Name AS PharmacistName,
+                              CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName, ph.Name AS PharmacistName,
                               p.CustomerID, p.PharmacistID
                        FROM PRESCRIPTION p JOIN CUSTOMER c ON p.CustomerID = c.CustomerID
                        JOIN PHARMACIST ph ON p.PharmacistID = ph.PharmacistID
@@ -175,7 +173,7 @@ ENTITIES = {
         "fields": [
             {"key": "PrescriptionDate", "label": "Prescription date", "type": "date", "required": True},
             {"key": "CustomerID", "label": "Customer", "type": "fk", "fk_entity": "CUSTOMER",
-             "fk_label_sql": "FirstName || ' ' || LastName", "fk_pk": "CustomerID", "required": True},
+             "fk_label_sql": "CONCAT(FirstName, ' ', LastName)", "fk_pk": "CustomerID", "required": True},
             {"key": "PharmacistID", "label": "Pharmacist", "type": "fk", "fk_entity": "PHARMACIST",
              "fk_label_sql": "Name", "fk_pk": "PharmacistID", "required": True},
             {"key": "DosageInstructions", "label": "Dosage instructions", "type": "text"},
@@ -207,9 +205,9 @@ ENTITIES = {
         "no_edit": True,
         "fields": [
             {"key": "PrescriptionID", "label": "Prescription", "type": "fk", "fk_entity": "PRESCRIPTION",
-             "fk_label_sql": "'#' || PrescriptionID || ' \u2014 ' || PrescriptionDate", "fk_pk": "PrescriptionID", "required": True},
+             "fk_label_sql": "CONCAT('#', PrescriptionID, ' — ', PrescriptionDate)", "fk_pk": "PrescriptionID", "required": True},
             {"key": "MedicineID", "label": "Medicine (stock shown)", "type": "fk", "fk_entity": "MEDICINE",
-             "fk_label_sql": "MedicineName || '  (' || StockQuantity || ' in stock)'", "fk_pk": "MedicineID", "required": True},
+             "fk_label_sql": "CONCAT(MedicineName, '  (', StockQuantity, ' in stock)')", "fk_pk": "MedicineID", "required": True},
             {"key": "Quantity", "label": "Quantity to dispense", "type": "int", "step": 1, "min": 1, "required": True},
             {"key": "Dosage", "label": "Dosage", "type": "text"},
             {"key": "Frequency", "label": "Frequency", "type": "text"},
@@ -260,7 +258,7 @@ ENTITIES = {
         "no_edit": True,
         "fields": [
             {"key": "PurchaseID", "label": "Purchase order", "type": "fk", "fk_entity": "PURCHASE",
-             "fk_label_sql": "'#' || PurchaseID || ' \u2014 ' || PurchaseDate", "fk_pk": "PurchaseID", "required": True},
+             "fk_label_sql": "CONCAT('#', PurchaseID, ' — ', PurchaseDate)", "fk_pk": "PurchaseID", "required": True},
             {"key": "MedicineID", "label": "Medicine", "type": "fk", "fk_entity": "MEDICINE",
              "fk_label_sql": "MedicineName", "fk_pk": "MedicineID", "required": True},
             {"key": "QuantityPurchased", "label": "Quantity received", "type": "int", "step": 1, "min": 1, "required": True},
@@ -271,12 +269,12 @@ ENTITIES = {
 }
 
 NAV = [
-    ("General", [("DASHBOARD", "Dashboard", "\U0001F4CA"), ("REPORTS", "Reports", "\U0001F4CB")]),
-    ("Clinical", [("PRESCRIPTION", "Prescriptions", "\u211E"), ("PRESCRIPTION_ITEM", "Dispensing Log", "\U0001F489"),
-                  ("CUSTOMER", "Customers", "\U0001F642")]),
-    ("Inventory", [("MEDICINE", "Medicines", "\U0001F48A"), ("SUPPLIER", "Suppliers", "\U0001F69A"),
-                   ("PURCHASE", "Purchases", "\U0001F4E5"), ("PURCHASE_ITEM", "Stock Receiving", "\U0001F4E4")]),
-    ("Staff", [("PHARMACIST", "Pharmacists", "\U0001FA7A")]),
+    ("General", [("DASHBOARD", "Dashboard", "📊"), ("REPORTS", "Reports", "📋")]),
+    ("Clinical", [("PRESCRIPTION", "Prescriptions", "℞"), ("PRESCRIPTION_ITEM", "Dispensing Log", "💉"),
+                  ("CUSTOMER", "Customers", "🙂")]),
+    ("Inventory", [("MEDICINE", "Medicines", "💊"), ("SUPPLIER", "Suppliers", "🚚"),
+                   ("PURCHASE", "Purchases", "📥"), ("PURCHASE_ITEM", "Stock Receiving", "📤")]),
+    ("Staff", [("PHARMACIST", "Pharmacists", "🩺")]),
 ]
 
 SINGULAR = {
