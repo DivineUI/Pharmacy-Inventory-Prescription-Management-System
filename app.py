@@ -425,3 +425,34 @@ elif section == "REPORTS":
     render_reports()
 else:
     render_entity(section)
+
+import base64
+import streamlit as st
+
+def set_local_background(image_file):
+    with open(image_file, "rb") as file:
+        encoded = base64.b64encode(file.read()).decode()
+    
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background: linear-gradient(rgba(14, 17, 23, 0.85), rgba(14, 17, 23, 0.85)), 
+                        url("data:image/png;base64,{encoded}");
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }}
+        [data-testid="stSidebar"] {{
+            background-color: rgba(18, 18, 24, 0.88) !important;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Load the background image
+set_local_background("bg_pharmacy.jpg")
+
+
+
