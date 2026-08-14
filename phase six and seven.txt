@@ -1,0 +1,1404 @@
+MariaDB [pharmacy_db]> SELECT
+    ->     m.MedicineID,
+    ->     m.MedicineName,
+    ->     m.Category,
+    ->     m.UnitPrice,
+    ->     m.StockQuantity,
+    ->     s.SupplierName
+    -> FROM MEDICINE m
+    -> JOIN SUPPLIER s
+    ->     ON m.SupplierID = s.SupplierID
+    -> ORDER BY m.MedicineName;
++------------+--------------------------------+---------------------------+-----------+---------------+------------------------------+
+| MedicineID | MedicineName                   | Category                  | UnitPrice | StockQuantity | SupplierName                 |
++------------+--------------------------------+---------------------------+-----------+---------------+------------------------------+
+|          5 | Amlodipine                     | Antihypertensive          |      0.35 |           260 | Accra Pharma Wholesalers     |
+|          1 | Amoxicillin                    | Antibiotic                |      0.45 |           420 | GlobalMeds Supply Co.        |
+|         24 | Artemether/Lumefantrine        | Antimalarial              |      1.80 |           320 | Zenith Pharma Imports        |
+|         21 | Aspirin                        | Painkiller / Antiplatelet |      0.08 |           700 | MedPlus Distributors Ltd     |
+|         11 | Azithromycin                   | Antibiotic                |      0.75 |           140 | GlobalMeds Supply Co.        |
+|          7 | Cetirizine                     | Antihistamine             |      0.22 |           210 | Unity Pharmaceuticals Supply |
+|         25 | Chlorpheniramine               | Antihistamine             |      0.12 |            12 | Unity Pharmaceuticals Supply |
+|         10 | Ciprofloxacin                  | Antibiotic                |      0.55 |             5 | GlobalMeds Supply Co.        |
+|         27 | Co-trimoxazole                 | Antibiotic                |      0.24 |             3 | GlobalMeds Supply Co.        |
+|         30 | Cough Syrup (Dextromethorphan) | Cold & Flu                |      1.10 |            95 | Radiant Health Imports       |
+|         15 | Diclofenac                     | Painkiller / NSAID        |      0.18 |           310 | MedPlus Distributors Ltd     |
+|         19 | Doxycycline                    | Antibiotic                |      0.32 |           150 | GlobalMeds Supply Co.        |
+|         23 | Folic Acid                     | Vitamin/Supplement        |      0.10 |           260 | Sunrise Pharmaceuticals Ltd  |
+|         20 | Hydrochlorothiazide            | Antihypertensive          |      0.18 |           200 | Accra Pharma Wholesalers     |
+|          3 | Ibuprofen                      | Painkiller                |      0.15 |           850 | MedPlus Distributors Ltd     |
+|         16 | Insulin Glargine               | Antidiabetic              |     12.50 |             8 | Accra Pharma Wholesalers     |
+|          6 | Loratadine                     | Antihistamine             |      0.25 |           180 | Unity Pharmaceuticals Supply |
+|         17 | Losartan                       | Antihypertensive          |      0.38 |           220 | Accra Pharma Wholesalers     |
+|          4 | Metformin                      | Antidiabetic              |      0.30 |           300 | Accra Pharma Wholesalers     |
+|         18 | Metronidazole                  | Antibiotic                |      0.20 |             0 | GlobalMeds Supply Co.        |
+|         14 | Multivitamin Complex           | Vitamin/Supplement        |      0.20 |           430 | Sunrise Pharmaceuticals Ltd  |
+|          8 | Omeprazole                     | Antacid / PPI             |      0.40 |           190 | Kumasi Pharma Traders        |
+|         28 | ORS Sachets                    | Rehydration               |      0.15 |           640 | Radiant Health Imports       |
+|          2 | Paracetamol                    | Painkiller                |      0.10 |          1200 | MedPlus Distributors Ltd     |
+|         22 | Prednisolone                   | Corticosteroid            |      0.26 |            90 | Kumasi Pharma Traders        |
+|          9 | Ranitidine                     | Antacid                   |      0.28 |             0 | Kumasi Pharma Traders        |
+|         12 | Salbutamol Inhaler             | Bronchodilator            |      3.20 |            60 | Everwell Distributors        |
+|         26 | Simvastatin                    | Antilipidemic             |      0.34 |           175 | Accra Pharma Wholesalers     |
+|         13 | Vitamin C                      | Vitamin/Supplement        |      0.12 |           500 | Sunrise Pharmaceuticals Ltd  |
+|         29 | Zinc Sulfate                   | Vitamin/Supplement        |      0.14 |           380 | Sunrise Pharmaceuticals Ltd  |
++------------+--------------------------------+---------------------------+-----------+---------------+------------------------------+
+30 rows in set (0.033 sec)
+
+
+
+2.
+MariaDB [pharmacy_db]> SELECT
+    ->     s.SupplierID,
+    ->     s.SupplierName,
+    ->     COUNT(m.MedicineID) AS NumberOfMedicines
+    -> FROM SUPPLIER s
+    -> LEFT JOIN MEDICINE m
+    ->     ON s.SupplierID = m.SupplierID
+    -> GROUP BY s.SupplierID, s.SupplierName
+    -> ORDER BY NumberOfMedicines DESC;
++------------+------------------------------+-------------------+
+| SupplierID | SupplierName                 | NumberOfMedicines |
++------------+------------------------------+-------------------+
+|          3 | GlobalMeds Supply Co.        |                 6 |
+|          5 | Accra Pharma Wholesalers     |                 6 |
+|         12 | Sunrise Pharmaceuticals Ltd  |                 4 |
+|          1 | MedPlus Distributors Ltd     |                 4 |
+|          7 | Unity Pharmaceuticals Supply |                 3 |
+|          9 | Kumasi Pharma Traders        |                 3 |
+|         19 | Radiant Health Imports       |                 2 |
+|         11 | Everwell Distributors        |                 1 |
+|         16 | Zenith Pharma Imports        |                 1 |
+|          2 | PharmaCare Wholesale         |                 0 |
+|         10 | BlueCross Pharma Supply      |                 0 |
+|         18 | Golden Star Pharmaceuticals  |                 0 |
+|         15 | Prime Health Distributors    |                 0 |
+|          4 | HealthLink Distributors      |                 0 |
+|         20 | Apex Pharma Wholesale        |                 0 |
+|         17 | TrustMed Supply Chain        |                 0 |
+|          6 | Continental Drug House       |                 0 |
+|         14 | Coastal Meds Wholesale       |                 0 |
+|         22 | Horizon Medical Supply       |                 0 |
+|          8 | Westgate Medical Imports     |                 0 |
+|         13 | National Drug Supply Co.     |                 0 |
+|         21 | Reliable Drug Distributors   |                 0 |
++------------+------------------------------+-------------------+
+22 rows in set (0.035 sec)
+
+MariaDB [pharmacy_db]>
+
+
+3.
+MariaDB [pharmacy_db]> SELECT
+    ->     MedicineID,
+    ->     MedicineName,
+    ->     StockQuantity,
+    ->     UnitPrice
+    -> FROM MEDICINE
+    -> WHERE StockQuantity < (
+    ->     SELECT AVG(StockQuantity)
+    ->     FROM MEDICINE
+    -> )
+    -> ORDER BY StockQuantity ASC;
++------------+--------------------------------+---------------+-----------+
+| MedicineID | MedicineName                   | StockQuantity | UnitPrice |
++------------+--------------------------------+---------------+-----------+
+|         18 | Metronidazole                  |             0 |      0.20 |
+|          9 | Ranitidine                     |             0 |      0.28 |
+|         27 | Co-trimoxazole                 |             3 |      0.24 |
+|         10 | Ciprofloxacin                  |             5 |      0.55 |
+|         16 | Insulin Glargine               |             8 |     12.50 |
+|         25 | Chlorpheniramine               |            12 |      0.12 |
+|         12 | Salbutamol Inhaler             |            60 |      3.20 |
+|         22 | Prednisolone                   |            90 |      0.26 |
+|         30 | Cough Syrup (Dextromethorphan) |            95 |      1.10 |
+|         11 | Azithromycin                   |           140 |      0.75 |
+|         19 | Doxycycline                    |           150 |      0.32 |
+|         26 | Simvastatin                    |           175 |      0.34 |
+|          6 | Loratadine                     |           180 |      0.25 |
+|          8 | Omeprazole                     |           190 |      0.40 |
+|         20 | Hydrochlorothiazide            |           200 |      0.18 |
+|          7 | Cetirizine                     |           210 |      0.22 |
+|         17 | Losartan                       |           220 |      0.38 |
+|         23 | Folic Acid                     |           260 |      0.10 |
+|          5 | Amlodipine                     |           260 |      0.35 |
++------------+--------------------------------+---------------+-----------+
+19 rows in set (0.027 sec)
+
+
+4.
+MariaDB [pharmacy_db]> SELECT
+    ->     c.CustomerID,
+    ->     CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
+    ->     COUNT(p.PrescriptionID) AS PrescriptionCount
+    -> FROM CUSTOMER c
+    -> JOIN PRESCRIPTION p
+    ->     ON c.CustomerID = p.CustomerID
+    -> GROUP BY c.CustomerID, c.FirstName, c.LastName
+    -> HAVING COUNT(p.PrescriptionID) > (
+    ->     SELECT AVG(PrescriptionCount)
+    ->     FROM (
+    ->         SELECT
+    ->             CustomerID,
+    ->             COUNT(*) AS PrescriptionCount
+    ->         FROM PRESCRIPTION
+    ->         GROUP BY CustomerID
+    ->     ) AS CustomerPrescriptionCounts
+    -> )
+    -> ORDER BY PrescriptionCount DESC;
++------------+--------------+-------------------+
+| CustomerID | CustomerName | PrescriptionCount |
++------------+--------------+-------------------+
+|          4 | Kojo Yeboah  |                 4 |
+|          1 | Ama Ofori    |                 4 |
+|          5 | Akosua Aidoo |                 3 |
+|          8 | Kofi Asante  |                 2 |
+|          2 | Kwame Adjei  |                 2 |
+|          6 | Yaw Lartey   |                 2 |
+|          3 | Efua Antwi   |                 2 |
+|          7 | Abena Mensah |                 2 |
++------------+--------------+-------------------+
+8 rows in set (0.031 sec)
+
+MariaDB [pharmacy_db]>
+
+
+5.
+MariaDB [pharmacy_db]> SELECT
+    ->     m.MedicineID,
+    ->     m.MedicineName,
+    ->     COALESCE(SUM(pi.QuantityPurchased), 0) AS TotalQuantityPurchased
+    -> FROM MEDICINE m
+    -> LEFT JOIN PURCHASE_ITEM pi
+    ->     ON m.MedicineID = pi.MedicineID
+    -> GROUP BY m.MedicineID, m.MedicineName
+    -> ORDER BY TotalQuantityPurchased DESC;
++------------+--------------------------------+------------------------+
+| MedicineID | MedicineName                   | TotalQuantityPurchased |
++------------+--------------------------------+------------------------+
+|          7 | Cetirizine                     |                   1300 |
+|          8 | Omeprazole                     |                   1000 |
+|         30 | Cough Syrup (Dextromethorphan) |                    800 |
+|         29 | Zinc Sulfate                   |                    800 |
+|          2 | Paracetamol                    |                    750 |
+|         11 | Azithromycin                   |                    650 |
+|         22 | Prednisolone                   |                    650 |
+|         27 | Co-trimoxazole                 |                    650 |
+|         24 | Artemether/Lumefantrine        |                    650 |
+|          4 | Metformin                      |                    600 |
+|          9 | Ranitidine                     |                    550 |
+|         15 | Diclofenac                     |                    550 |
+|          3 | Ibuprofen                      |                    500 |
+|         19 | Doxycycline                    |                    500 |
+|         14 | Multivitamin Complex           |                    450 |
+|         18 | Metronidazole                  |                    450 |
+|         23 | Folic Acid                     |                    400 |
+|         25 | Chlorpheniramine               |                    400 |
+|          6 | Loratadine                     |                    400 |
+|          1 | Amoxicillin                    |                    350 |
+|         13 | Vitamin C                      |                    350 |
+|         20 | Hydrochlorothiazide            |                    350 |
+|         21 | Aspirin                        |                    250 |
+|         17 | Losartan                       |                    100 |
+|          5 | Amlodipine                     |                     50 |
+|         12 | Salbutamol Inhaler             |                     50 |
+|         26 | Simvastatin                    |                      0 |
+|         16 | Insulin Glargine               |                      0 |
+|         28 | ORS Sachets                    |                      0 |
+|         10 | Ciprofloxacin                  |                      0 |
++------------+--------------------------------+------------------------+
+30 rows in set (0.029 sec)
+
+6.
+MariaDB [pharmacy_db]> SELECT
+    ->     s.SupplierID,
+    ->     s.SupplierName,
+    ->     COUNT(DISTINCT p.PurchaseID) AS NumberOfPurchases,
+    ->     SUM(pi.QuantityPurchased * pi.UnitCost) AS TotalSpent
+    -> FROM SUPPLIER s
+    -> JOIN PURCHASE p
+    ->     ON s.SupplierID = p.SupplierID
+    -> JOIN PURCHASE_ITEM pi
+    ->     ON p.PurchaseID = pi.PurchaseID
+    -> GROUP BY s.SupplierID, s.SupplierName
+    -> ORDER BY TotalSpent DESC;
++------------+------------------------------+-------------------+------------+
+| SupplierID | SupplierName                 | NumberOfPurchases | TotalSpent |
++------------+------------------------------+-------------------+------------+
+|          3 | GlobalMeds Supply Co.        |                 3 |     863.50 |
+|          7 | Unity Pharmaceuticals Supply |                 3 |     858.00 |
+|         19 | Radiant Health Imports       |                 2 |     309.00 |
+|         11 | Everwell Distributors        |                 3 |     307.50 |
+|         17 | TrustMed Supply Chain        |                 2 |     297.50 |
+|         15 | Prime Health Distributors    |                 2 |     210.00 |
+|          9 | Kumasi Pharma Traders        |                 2 |     156.00 |
+|         13 | National Drug Supply Co.     |                 2 |     152.00 |
+|         21 | Reliable Drug Distributors   |                 2 |     143.00 |
+|          5 | Accra Pharma Wholesalers     |                 2 |      98.00 |
+|          1 | MedPlus Distributors Ltd     |                 2 |      81.00 |
++------------+------------------------------+-------------------+------------+
+11 rows in set (0.029 sec)
+
+
+7.
+MariaDB [pharmacy_db]> SELECT
+    ->     MedicineID,
+    ->     MedicineName,
+    ->     Category,
+    ->     UnitPrice,
+    ->     RANK() OVER (
+    ->         ORDER BY UnitPrice DESC
+    ->     ) AS PriceRank
+    -> FROM MEDICINE
+    -> ORDER BY PriceRank;
++------------+--------------------------------+---------------------------+-----------+-----------+
+| MedicineID | MedicineName                   | Category                  | UnitPrice | PriceRank |
++------------+--------------------------------+---------------------------+-----------+-----------+
+|         16 | Insulin Glargine               | Antidiabetic              |     12.50 |         1 |
+|         12 | Salbutamol Inhaler             | Bronchodilator            |      3.20 |         2 |
+|         24 | Artemether/Lumefantrine        | Antimalarial              |      1.80 |         3 |
+|         30 | Cough Syrup (Dextromethorphan) | Cold & Flu                |      1.10 |         4 |
+|         11 | Azithromycin                   | Antibiotic                |      0.75 |         5 |
+|         10 | Ciprofloxacin                  | Antibiotic                |      0.55 |         6 |
+|          1 | Amoxicillin                    | Antibiotic                |      0.45 |         7 |
+|          8 | Omeprazole                     | Antacid / PPI             |      0.40 |         8 |
+|         17 | Losartan                       | Antihypertensive          |      0.38 |         9 |
+|          5 | Amlodipine                     | Antihypertensive          |      0.35 |        10 |
+|         26 | Simvastatin                    | Antilipidemic             |      0.34 |        11 |
+|         19 | Doxycycline                    | Antibiotic                |      0.32 |        12 |
+|          4 | Metformin                      | Antidiabetic              |      0.30 |        13 |
+|          9 | Ranitidine                     | Antacid                   |      0.28 |        14 |
+|         22 | Prednisolone                   | Corticosteroid            |      0.26 |        15 |
+|          6 | Loratadine                     | Antihistamine             |      0.25 |        16 |
+|         27 | Co-trimoxazole                 | Antibiotic                |      0.24 |        17 |
+|          7 | Cetirizine                     | Antihistamine             |      0.22 |        18 |
+|         14 | Multivitamin Complex           | Vitamin/Supplement        |      0.20 |        19 |
+|         18 | Metronidazole                  | Antibiotic                |      0.20 |        19 |
+|         15 | Diclofenac                     | Painkiller / NSAID        |      0.18 |        21 |
+|         20 | Hydrochlorothiazide            | Antihypertensive          |      0.18 |        21 |
+|         28 | ORS Sachets                    | Rehydration               |      0.15 |        23 |
+|          3 | Ibuprofen                      | Painkiller                |      0.15 |        23 |
+|         29 | Zinc Sulfate                   | Vitamin/Supplement        |      0.14 |        25 |
+|         13 | Vitamin C                      | Vitamin/Supplement        |      0.12 |        26 |
+|         25 | Chlorpheniramine               | Antihistamine             |      0.12 |        26 |
+|         23 | Folic Acid                     | Vitamin/Supplement        |      0.10 |        28 |
+|          2 | Paracetamol                    | Painkiller                |      0.10 |        28 |
+|         21 | Aspirin                        | Painkiller / Antiplatelet |      0.08 |        30 |
++------------+--------------------------------+---------------------------+-----------+-----------+
+30 rows in set (0.028 sec)
+
+MariaDB [pharmacy_db]>
+
+8.
+MariaDB [pharmacy_db]> SELECT
+    ->     MedicineID,
+    ->     MedicineName,
+    ->     Category,
+    ->     StockQuantity,
+    ->     RANK() OVER (
+    ->         PARTITION BY Category
+    ->         ORDER BY StockQuantity DESC
+    ->     ) AS CategoryStockRank
+    -> FROM MEDICINE
+    -> ORDER BY Category, CategoryStockRank;
++------------+--------------------------------+---------------------------+---------------+-------------------+
+| MedicineID | MedicineName                   | Category                  | StockQuantity | CategoryStockRank |
++------------+--------------------------------+---------------------------+---------------+-------------------+
+|          9 | Ranitidine                     | Antacid                   |             0 |                 1 |
+|          8 | Omeprazole                     | Antacid / PPI             |           190 |                 1 |
+|          1 | Amoxicillin                    | Antibiotic                |           420 |                 1 |
+|         19 | Doxycycline                    | Antibiotic                |           150 |                 2 |
+|         11 | Azithromycin                   | Antibiotic                |           140 |                 3 |
+|         10 | Ciprofloxacin                  | Antibiotic                |             5 |                 4 |
+|         27 | Co-trimoxazole                 | Antibiotic                |             3 |                 5 |
+|         18 | Metronidazole                  | Antibiotic                |             0 |                 6 |
+|          4 | Metformin                      | Antidiabetic              |           300 |                 1 |
+|         16 | Insulin Glargine               | Antidiabetic              |             8 |                 2 |
+|          7 | Cetirizine                     | Antihistamine             |           210 |                 1 |
+|          6 | Loratadine                     | Antihistamine             |           180 |                 2 |
+|         25 | Chlorpheniramine               | Antihistamine             |            12 |                 3 |
+|          5 | Amlodipine                     | Antihypertensive          |           260 |                 1 |
+|         17 | Losartan                       | Antihypertensive          |           220 |                 2 |
+|         20 | Hydrochlorothiazide            | Antihypertensive          |           200 |                 3 |
+|         26 | Simvastatin                    | Antilipidemic             |           175 |                 1 |
+|         24 | Artemether/Lumefantrine        | Antimalarial              |           320 |                 1 |
+|         12 | Salbutamol Inhaler             | Bronchodilator            |            60 |                 1 |
+|         30 | Cough Syrup (Dextromethorphan) | Cold & Flu                |            95 |                 1 |
+|         22 | Prednisolone                   | Corticosteroid            |            90 |                 1 |
+|          2 | Paracetamol                    | Painkiller                |          1200 |                 1 |
+|          3 | Ibuprofen                      | Painkiller                |           850 |                 2 |
+|         21 | Aspirin                        | Painkiller / Antiplatelet |           700 |                 1 |
+|         15 | Diclofenac                     | Painkiller / NSAID        |           310 |                 1 |
+|         28 | ORS Sachets                    | Rehydration               |           640 |                 1 |
+|         13 | Vitamin C                      | Vitamin/Supplement        |           500 |                 1 |
+|         14 | Multivitamin Complex           | Vitamin/Supplement        |           430 |                 2 |
+|         29 | Zinc Sulfate                   | Vitamin/Supplement        |           380 |                 3 |
+|         23 | Folic Acid                     | Vitamin/Supplement        |           260 |                 4 |
++------------+--------------------------------+---------------------------+---------------+-------------------+
+30 rows in set (0.002 sec)
+
+MariaDB [pharmacy_db]>
+
+
+9.
+MariaDB [pharmacy_db]> SELECT
+    ->     p.PrescriptionID,
+    ->     CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
+    ->     p.PrescriptionDate,
+    ->     LAG(p.PrescriptionDate) OVER (
+    ->         PARTITION BY p.CustomerID
+    ->         ORDER BY p.PrescriptionDate
+    ->     ) AS PreviousPrescriptionDate
+    -> FROM PRESCRIPTION p
+    -> JOIN CUSTOMER c
+    ->     ON p.CustomerID = c.CustomerID
+    -> ORDER BY p.CustomerID, p.PrescriptionDate;
++----------------+------------------+------------------+--------------------------+
+| PrescriptionID | CustomerName     | PrescriptionDate | PreviousPrescriptionDate |
++----------------+------------------+------------------+--------------------------+
+|             27 | Ama Ofori        | 2025-12-12       | NULL                     |
+|             17 | Ama Ofori        | 2026-03-12       | 2025-12-12               |
+|             16 | Ama Ofori        | 2026-03-21       | 2026-03-12               |
+|             14 | Ama Ofori        | 2026-04-08       | 2026-03-21               |
+|             25 | Kwame Adjei      | 2025-12-30       | NULL                     |
+|             20 | Kwame Adjei      | 2026-02-13       | 2025-12-30               |
+|             19 | Efua Antwi       | 2026-02-22       | NULL                     |
+|              8 | Efua Antwi       | 2026-06-01       | 2026-02-22               |
+|             29 | Kojo Yeboah      | 2025-11-24       | NULL                     |
+|             22 | Kojo Yeboah      | 2026-01-26       | 2025-11-24               |
+|             11 | Kojo Yeboah      | 2026-05-05       | 2026-01-26               |
+|              4 | Kojo Yeboah      | 2026-07-07       | 2026-05-05               |
+|             23 | Akosua Aidoo     | 2026-01-17       | NULL                     |
+|             12 | Akosua Aidoo     | 2026-04-26       | 2026-01-17               |
+|              1 | Akosua Aidoo     | 2026-08-03       | 2026-04-26               |
+|              5 | Yaw Lartey       | 2026-06-28       | NULL                     |
+|              3 | Yaw Lartey       | 2026-07-16       | 2026-06-28               |
+|             30 | Abena Mensah     | 2025-11-15       | NULL                     |
+|              7 | Abena Mensah     | 2026-06-10       | 2025-11-15               |
+|             10 | Kofi Asante      | 2026-05-14       | NULL                     |
+|              6 | Kofi Asante      | 2026-06-19       | 2026-05-14               |
+|             28 | Afia Nkrumah     | 2025-12-03       | NULL                     |
+|             13 | Yaw Tetteh       | 2026-04-17       | NULL                     |
+|              9 | Abena Bonsu      | 2026-05-23       | NULL                     |
+|             26 | Nana Boateng     | 2025-12-21       | NULL                     |
+|              2 | Akua Frimpong    | 2026-07-25       | NULL                     |
+|             21 | Fiifi Acheampong | 2026-02-04       | NULL                     |
+|             15 | Comfort Addo     | 2026-03-30       | NULL                     |
+|             24 | Mercy Appiah     | 2026-01-08       | NULL                     |
+|             18 | Grace Adjei      | 2026-03-03       | NULL                     |
++----------------+------------------+------------------+--------------------------+
+30 rows in set (0.002 sec)
+
+
+10.
+MariaDB [pharmacy_db]> SELECT
+    ->     m.MedicineID,
+    ->     m.MedicineName,
+    ->     m.Category,
+    ->     m.StockQuantity
+    -> FROM MEDICINE m
+    -> WHERE NOT EXISTS (
+    ->     SELECT 1
+    ->     FROM PURCHASE_ITEM pi
+    ->     WHERE pi.MedicineID = m.MedicineID
+    -> )
+    -> ORDER BY m.MedicineName;
++------------+------------------+---------------+---------------+
+| MedicineID | MedicineName     | Category      | StockQuantity |
++------------+------------------+---------------+---------------+
+|         10 | Ciprofloxacin    | Antibiotic    |             5 |
+|         16 | Insulin Glargine | Antidiabetic  |             8 |
+|         28 | ORS Sachets      | Rehydration   |           640 |
+|         26 | Simvastatin      | Antilipidemic |           175 |
++------------+------------------+---------------+---------------+
+4 rows in set (0.009 sec)
+
+MariaDB [pharmacy_db]>
+
+
+view 1:Medicines Expiring Soon
+MariaDB [pharmacy_db]> CREATE OR REPLACE VIEW vw_medicines_expiring_soon AS
+    -> SELECT
+    ->     m.MedicineID,
+    ->     m.MedicineName,
+    ->     m.Category,
+    ->     m.StockQuantity,
+    ->     m.ExpiryDate,
+    ->     s.SupplierName,
+    ->     DATEDIFF(m.ExpiryDate, CURDATE()) AS DaysUntilExpiry
+    -> FROM MEDICINE m
+    -> JOIN SUPPLIER s
+    ->     ON m.SupplierID = s.SupplierID
+    -> WHERE m.ExpiryDate BETWEEN CURDATE()
+    ->     AND DATE_ADD(CURDATE(), INTERVAL 60 DAY)
+    -> ORDER BY m.ExpiryDate;
+Query OK, 0 rows affected (0.018 sec)
+
+MariaDB [pharmacy_db]> SELECT * FROM vw_medicines_expiring_soon;
++------------+------------------+--------------+---------------+------------+--------------------------+-----------------+
+| MedicineID | MedicineName     | Category     | StockQuantity | ExpiryDate | SupplierName             | DaysUntilExpiry |
++------------+------------------+--------------+---------------+------------+--------------------------+-----------------+
+|         18 | Metronidazole    | Antibiotic   |             0 | 2026-08-23 | GlobalMeds Supply Co.    |              10 |
+|         27 | Co-trimoxazole   | Antibiotic   |             3 | 2026-08-28 | GlobalMeds Supply Co.    |              15 |
+|          9 | Ranitidine       | Antacid      |             0 | 2026-09-02 | Kumasi Pharma Traders    |              20 |
+|         10 | Ciprofloxacin    | Antibiotic   |             5 | 2026-09-17 | GlobalMeds Supply Co.    |              35 |
+|         16 | Insulin Glargine | Antidiabetic |             8 | 2026-10-07 | Accra Pharma Wholesalers |              55 |
++------------+------------------+--------------+---------------+------------+--------------------------+-----------------+
+5 rows in set (0.034 sec)
+
+MariaDB [pharmacy_db]>
+
+
+view 2:Low Stock Alert
+MariaDB [pharmacy_db]> CREATE OR REPLACE VIEW vw_low_stock_alert AS
+    -> SELECT
+    ->     m.MedicineID,
+    ->     m.MedicineName,
+    ->     m.Category,
+    ->     m.StockQuantity,
+    ->     m.UnitPrice,
+    ->     s.SupplierName,
+    ->     s.ContactNumber
+    -> FROM MEDICINE m
+    -> JOIN SUPPLIER s
+    ->     ON m.SupplierID = s.SupplierID
+    -> WHERE m.StockQuantity <= 10
+    -> ORDER BY m.StockQuantity ASC;
+Query OK, 0 rows affected (0.010 sec)
+
+MariaDB [pharmacy_db]> SELECT * FROM vw_low_stock_alert;
++------------+------------------+--------------+---------------+-----------+--------------------------+---------------+
+| MedicineID | MedicineName     | Category     | StockQuantity | UnitPrice | SupplierName             | ContactNumber |
++------------+------------------+--------------+---------------+-----------+--------------------------+---------------+
+|          9 | Ranitidine       | Antacid      |             0 |      0.28 | Kumasi Pharma Traders    | 0322-551-209  |
+|         18 | Metronidazole    | Antibiotic   |             0 |      0.20 | GlobalMeds Supply Co.    | 0302-551-203  |
+|         27 | Co-trimoxazole   | Antibiotic   |             3 |      0.24 | GlobalMeds Supply Co.    | 0302-551-203  |
+|         10 | Ciprofloxacin    | Antibiotic   |             5 |      0.55 | GlobalMeds Supply Co.    | 0302-551-203  |
+|         16 | Insulin Glargine | Antidiabetic |             8 |     12.50 | Accra Pharma Wholesalers | 0302-551-205  |
++------------+------------------+--------------+---------------+-----------+--------------------------+---------------+
+5 rows in set (0.003 sec)
+
+MariaDB [pharmacy_db]>
+
+view3: Supplier Purchase History
+MariaDB [pharmacy_db]> CREATE OR REPLACE VIEW vw_supplier_purchase_history AS
+    -> SELECT
+    ->     s.SupplierID,
+    ->     s.SupplierName,
+    ->     COUNT(DISTINCT p.PurchaseID) AS NumberOfPurchases,
+    ->     SUM(pi.QuantityPurchased) AS TotalItemsPurchased,
+    ->     SUM(pi.QuantityPurchased * pi.UnitCost) AS TotalPurchaseCost
+    -> FROM SUPPLIER s
+    -> LEFT JOIN PURCHASE p
+    ->     ON s.SupplierID = p.SupplierID
+    -> LEFT JOIN PURCHASE_ITEM pi
+    ->     ON p.PurchaseID = pi.PurchaseID
+    -> GROUP BY
+    ->     s.SupplierID,
+    ->     s.SupplierName
+    -> ORDER BY TotalPurchaseCost DESC;
+Query OK, 0 rows affected (0.009 sec)
+
+MariaDB [pharmacy_db]> SELECT * FROM vw_supplier_purchase_history;
++------------+------------------------------+-------------------+---------------------+-------------------+
+| SupplierID | SupplierName                 | NumberOfPurchases | TotalItemsPurchased | TotalPurchaseCost |
++------------+------------------------------+-------------------+---------------------+-------------------+
+|          3 | GlobalMeds Supply Co.        |                 3 |                2350 |            863.50 |
+|          7 | Unity Pharmaceuticals Supply |                 3 |                2050 |            858.00 |
+|         19 | Radiant Health Imports       |                 2 |                 900 |            309.00 |
+|         11 | Everwell Distributors        |                 3 |                1900 |            307.50 |
+|         17 | TrustMed Supply Chain        |                 2 |                1050 |            297.50 |
+|         15 | Prime Health Distributors    |                 2 |                1450 |            210.00 |
+|          9 | Kumasi Pharma Traders        |                 2 |                1100 |            156.00 |
+|         13 | National Drug Supply Co.     |                 2 |                 400 |            152.00 |
+|         21 | Reliable Drug Distributors   |                 2 |                 950 |            143.00 |
+|          5 | Accra Pharma Wholesalers     |                 2 |                 850 |             98.00 |
+|          1 | MedPlus Distributors Ltd     |                 2 |                 550 |             81.00 |
+|         16 | Zenith Pharma Imports        |                 0 |                NULL |              NULL |
+|         22 | Horizon Medical Supply       |                 0 |                NULL |              NULL |
+|          2 | PharmaCare Wholesale         |                 0 |                NULL |              NULL |
+|          8 | Westgate Medical Imports     |                 0 |                NULL |              NULL |
+|         14 | Coastal Meds Wholesale       |                 0 |                NULL |              NULL |
+|         20 | Apex Pharma Wholesale        |                 0 |                NULL |              NULL |
+|          6 | Continental Drug House       |                 0 |                NULL |              NULL |
+|         12 | Sunrise Pharmaceuticals Ltd  |                 0 |                NULL |              NULL |
+|         18 | Golden Star Pharmaceuticals  |                 0 |                NULL |              NULL |
+|          4 | HealthLink Distributors      |                 0 |                NULL |              NULL |
+|         10 | BlueCross Pharma Supply      |                 0 |                NULL |              NULL |
++------------+------------------------------+-------------------+---------------------+-------------------+
+22 rows in set (0.004 sec)
+
+MariaDB [pharmacy_db]>
+
+
+View 4 — Prescription History per Customer
+
+MariaDB [pharmacy_db]> CREATE OR REPLACE VIEW vw_customer_prescription_history AS
+    -> SELECT
+    ->     c.CustomerID,
+    ->     CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
+    ->     p.PrescriptionID,
+    ->     p.PrescriptionDate,
+    ->     p.DosageInstructions,
+    ->     p.Duration,
+    ->     ph.Name AS PharmacistName
+    -> FROM CUSTOMER c
+    -> JOIN PRESCRIPTION p
+    ->     ON c.CustomerID = p.CustomerID
+    -> JOIN PHARMACIST ph
+    ->     ON p.PharmacistID = ph.PharmacistID
+    -> ORDER BY
+    ->     c.CustomerID,
+    ->     p.PrescriptionDate DESC;
+Query OK, 0 rows affected (0.036 sec)
+
+MariaDB [pharmacy_db]> SELECT * FROM vw_customer_prescription_history;
++------------+------------------+----------------+------------------+---------------------------------+----------+----------------+
+| CustomerID | CustomerName     | PrescriptionID | PrescriptionDate | DosageInstructions              | Duration | PharmacistName |
++------------+------------------+----------------+------------------+---------------------------------+----------+----------------+
+|          1 | Ama Ofori        |             14 | 2026-04-08       | 1 tablet every 8 hours          | 30 days  | Comfort Kusi   |
+|          1 | Ama Ofori        |             16 | 2026-03-21       | 1 tablet twice daily with water | 14 days  | Efua Owusu     |
+|          1 | Ama Ofori        |             17 | 2026-03-12       | 5ml three times daily           | 3 days   | Isaac Twum     |
+|          1 | Ama Ofori        |             27 | 2025-12-12       | 1 tablet twice daily with water | 7 days   | Kofi Darko     |
+|          2 | Kwame Adjei      |             20 | 2026-02-13       | 1 tablet after meals            | 7 days   | Mercy Owusu    |
+|          2 | Kwame Adjei      |             25 | 2025-12-30       | 1 tablet in the morning         | 7 days   | Samuel Twum    |
+|          3 | Efua Antwi       |              8 | 2026-06-01       | 5ml three times daily           | 14 days  | Grace Owusu    |
+|          3 | Efua Antwi       |             19 | 2026-02-22       | 1 tablet in the morning         | 21 days  | Kwesi Darko    |
+|          4 | Kojo Yeboah      |              4 | 2026-07-07       | 1 capsule at bedtime            | 21 days  | Adwoa Owusu    |
+|          4 | Kojo Yeboah      |             11 | 2026-05-05       | 1 capsule at bedtime            | 3 days   | Emmanuel Darko |
+|          4 | Kojo Yeboah      |             22 | 2026-01-26       | 1 tablet in the morning         | 14 days  | Gifty Kusi     |
+|          4 | Kojo Yeboah      |             29 | 2025-11-24       | 1 capsule at bedtime            | 3 days   | Joseph Twum    |
+|          5 | Akosua Aidoo     |              1 | 2026-08-03       | 1 tablet in the morning         | 30 days  | Yaw Twum       |
+|          5 | Akosua Aidoo     |             12 | 2026-04-26       | 5ml three times daily           | 3 days   | Nana Owusu     |
+|          5 | Akosua Aidoo     |             23 | 2026-01-17       | 5ml three times daily           | 5 days   | Daniel Darko   |
+|          6 | Yaw Lartey       |              3 | 2026-07-16       | 2 tablets twice daily           | 5 days   | Daniel Darko   |
+|          6 | Yaw Lartey       |              5 | 2026-06-28       | 5ml three times daily           | 5 days   | Samuel Twum    |
+|          7 | Abena Mensah     |              7 | 2026-06-10       | 2 tablets twice daily           | 14 days  | Kofi Darko     |
+|          7 | Abena Mensah     |             30 | 2025-11-15       | 5ml three times daily           | 3 days   | Akosua Kusi    |
+|          8 | Kofi Asante      |              6 | 2026-06-19       | 1 capsule at bedtime            | 21 days  | Patience Kusi  |
+|          8 | Kofi Asante      |             10 | 2026-05-14       | 1 tablet in the morning         | 10 days  | Akosua Kusi    |
+|         13 | Afia Nkrumah     |             28 | 2025-12-03       | 5ml three times daily           | 7 days   | Grace Owusu    |
+|         14 | Yaw Tetteh       |             13 | 2026-04-17       | 2 tablets twice daily           | 30 days  | Kwame Twum     |
+|         15 | Abena Bonsu      |              9 | 2026-05-23       | 1 tablet in the morning         | 7 days   | Joseph Twum    |
+|         16 | Nana Boateng     |             26 | 2025-12-21       | 1 tablet twice daily with water | 14 days  | Patience Kusi  |
+|         19 | Akua Frimpong    |              2 | 2026-07-25       | 1 capsule at bedtime            | 3 days   | Gifty Kusi     |
+|         20 | Fiifi Acheampong |             21 | 2026-02-04       | 1 tablet after meals            | 21 days  | Yaw Twum       |
+|         23 | Comfort Addo     |             15 | 2026-03-30       | 1 capsule at bedtime            | 7 days   | Kwabena Darko  |
+|         25 | Mercy Appiah     |             24 | 2026-01-08       | 1 capsule at bedtime            | 30 days  | Adwoa Owusu    |
+|         27 | Grace Adjei      |             18 | 2026-03-03       | 1 capsule at bedtime            | 3 days   | Abena Kusi     |
++------------+------------------+----------------+------------------+---------------------------------+----------+----------------+
+30 rows in set (0.003 sec)
+
+MariaDB [pharmacy_db]>
+
+
+
+view 5: Prescription Medicine Details
+
+MariaDB [pharmacy_db]> CREATE OR REPLACE VIEW vw_prescription_medicine_details AS
+    -> SELECT
+    ->     p.PrescriptionID,
+    ->     p.PrescriptionDate,
+    ->     c.CustomerID,
+    ->     CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
+    ->     m.MedicineID,
+    ->     m.MedicineName,
+    ->     m.Category,
+    ->     pi.Quantity,
+    ->     pi.Dosage,
+    ->     pi.Frequency,
+    ->     pi.Duration
+    -> FROM PRESCRIPTION p
+    -> JOIN CUSTOMER c
+    ->     ON p.CustomerID = c.CustomerID
+    -> JOIN PRESCRIPTION_ITEM pi
+    ->     ON p.PrescriptionID = pi.PrescriptionID
+    -> JOIN MEDICINE m
+    ->     ON pi.MedicineID = m.MedicineID
+    -> ORDER BY
+    ->     p.PrescriptionDate DESC,
+    ->     p.PrescriptionID;
+Query OK, 0 rows affected (0.010 sec)
+
+MariaDB [pharmacy_db]> SELECT * FROM vw_prescription_medicine_details;
++----------------+------------------+------------+------------------+------------+--------------------------------+---------------------------+----------+---------------------------------+-------------------+----------+
+| PrescriptionID | PrescriptionDate | CustomerID | CustomerName     | MedicineID | MedicineName                   | Category                  | Quantity | Dosage                          | Frequency         | Duration |
++----------------+------------------+------------+------------------+------------+--------------------------------+---------------------------+----------+---------------------------------+-------------------+----------+
+|              1 | 2026-08-03       |          5 | Akosua Aidoo     |         14 | Multivitamin Complex           | Vitamin/Supplement        |       14 | 1 tablet in the morning         | Twice daily       | 7 days   |
+|              1 | 2026-08-03       |          5 | Akosua Aidoo     |         29 | Zinc Sulfate                   | Vitamin/Supplement        |       30 | 1 tablet twice daily with water | Once daily        | 21 days  |
+|              1 | 2026-08-03       |          5 | Akosua Aidoo     |         19 | Doxycycline                    | Antibiotic                |        1 | 2 tablets twice daily           | Twice daily       | 3 days   |
+|              2 | 2026-07-25       |         19 | Akua Frimpong    |         26 | Simvastatin                    | Antilipidemic             |       14 | 2 tablets twice daily           | Every 8 hours     | 14 days  |
+|              3 | 2026-07-16       |          6 | Yaw Lartey       |         15 | Diclofenac                     | Painkiller / NSAID        |       30 | 1 tablet after meals            | Every 12 hours    | 3 days   |
+|              3 | 2026-07-16       |          6 | Yaw Lartey       |         17 | Losartan                       | Antihypertensive          |        1 | 5ml three times daily           | Every 12 hours    | 10 days  |
+|              3 | 2026-07-16       |          6 | Yaw Lartey       |          9 | Ranitidine                     | Antacid                   |        1 | 5ml three times daily           | Every 8 hours     | 7 days   |
+|              4 | 2026-07-07       |          4 | Kojo Yeboah      |          1 | Amoxicillin                    | Antibiotic                |        5 | 1 tablet every 8 hours          | As needed         | 5 days   |
+|              4 | 2026-07-07       |          4 | Kojo Yeboah      |         24 | Artemether/Lumefantrine        | Antimalarial              |        5 | 1 capsule at bedtime            | Twice daily       | 10 days  |
+|              5 | 2026-06-28       |          6 | Yaw Lartey       |         18 | Metronidazole                  | Antibiotic                |       30 | 1 tablet after meals            | As needed         | 10 days  |
+|              6 | 2026-06-19       |          8 | Kofi Asante      |          1 | Amoxicillin                    | Antibiotic                |       10 | 5ml three times daily           | Twice daily       | 5 days   |
+|              6 | 2026-06-19       |          8 | Kofi Asante      |          4 | Metformin                      | Antidiabetic              |        3 | 2 tablets twice daily           | Once daily        | 3 days   |
+|              7 | 2026-06-10       |          7 | Abena Mensah     |         27 | Co-trimoxazole                 | Antibiotic                |       30 | 1 tablet every 8 hours          | Twice daily       | 3 days   |
+|              7 | 2026-06-10       |          7 | Abena Mensah     |          3 | Ibuprofen                      | Painkiller                |       20 | 1 tablet every 8 hours          | Three times daily | 30 days  |
+|              8 | 2026-06-01       |          3 | Efua Antwi       |         14 | Multivitamin Complex           | Vitamin/Supplement        |       30 | 1 capsule at bedtime            | Every 12 hours    | 10 days  |
+|              8 | 2026-06-01       |          3 | Efua Antwi       |          7 | Cetirizine                     | Antihistamine             |       14 | 1 tablet in the morning         | Every 8 hours     | 30 days  |
+|              8 | 2026-06-01       |          3 | Efua Antwi       |         30 | Cough Syrup (Dextromethorphan) | Cold & Flu                |       20 | 2 tablets twice daily           | Twice daily       | 7 days   |
+|              9 | 2026-05-23       |         15 | Abena Bonsu      |         11 | Azithromycin                   | Antibiotic                |        1 | 1 capsule at bedtime            | As needed         | 7 days   |
+|             10 | 2026-05-14       |          8 | Kofi Asante      |          3 | Ibuprofen                      | Painkiller                |        1 | 1 capsule at bedtime            | Once daily        | 5 days   |
+|             11 | 2026-05-05       |          4 | Kojo Yeboah      |          3 | Ibuprofen                      | Painkiller                |        3 | 5ml three times daily           | Every 12 hours    | 14 days  |
+|             11 | 2026-05-05       |          4 | Kojo Yeboah      |         17 | Losartan                       | Antihypertensive          |        3 | 1 tablet every 8 hours          | Every 12 hours    | 30 days  |
+|             12 | 2026-04-26       |          5 | Akosua Aidoo     |         16 | Insulin Glargine               | Antidiabetic              |       20 | 2 puffs as needed               | Twice daily       | 5 days   |
+|             12 | 2026-04-26       |          5 | Akosua Aidoo     |          8 | Omeprazole                     | Antacid / PPI             |        1 | 2 puffs as needed               | Three times daily | 14 days  |
+|             12 | 2026-04-26       |          5 | Akosua Aidoo     |         26 | Simvastatin                    | Antilipidemic             |       14 | 1 tablet twice daily with water | Every 12 hours    | 5 days   |
+|             13 | 2026-04-17       |         14 | Yaw Tetteh       |          2 | Paracetamol                    | Painkiller                |       14 | 1 tablet in the morning         | Once daily        | 7 days   |
+|             14 | 2026-04-08       |          1 | Ama Ofori        |          7 | Cetirizine                     | Antihistamine             |       30 | 1 tablet twice daily with water | Twice daily       | 14 days  |
+|             15 | 2026-03-30       |         23 | Comfort Addo     |          9 | Ranitidine                     | Antacid                   |       20 | 1 capsule at bedtime            | Once daily        | 14 days  |
+|             16 | 2026-03-21       |          1 | Ama Ofori        |          4 | Metformin                      | Antidiabetic              |       30 | 1 tablet after meals            | Once daily        | 21 days  |
+|             16 | 2026-03-21       |          1 | Ama Ofori        |          2 | Paracetamol                    | Painkiller                |        3 | 1 tablet every 8 hours          | Every 8 hours     | 14 days  |
+|             16 | 2026-03-21       |          1 | Ama Ofori        |         21 | Aspirin                        | Painkiller / Antiplatelet |       20 | 1 capsule at bedtime            | Every 8 hours     | 5 days   |
+|             17 | 2026-03-12       |          1 | Ama Ofori        |         13 | Vitamin C                      | Vitamin/Supplement        |        1 | 2 puffs as needed               | Three times daily | 21 days  |
+|             18 | 2026-03-03       |         27 | Grace Adjei      |         10 | Ciprofloxacin                  | Antibiotic                |       30 | 1 tablet twice daily with water | Twice daily       | 7 days   |
+|             18 | 2026-03-03       |         27 | Grace Adjei      |         14 | Multivitamin Complex           | Vitamin/Supplement        |        5 | 1 capsule at bedtime            | Once daily        | 30 days  |
+|             19 | 2026-02-22       |          3 | Efua Antwi       |          2 | Paracetamol                    | Painkiller                |        1 | 1 tablet after meals            | As needed         | 14 days  |
+|             19 | 2026-02-22       |          3 | Efua Antwi       |         24 | Artemether/Lumefantrine        | Antimalarial              |       30 | 1 tablet every 8 hours          | Once daily        | 30 days  |
+|             19 | 2026-02-22       |          3 | Efua Antwi       |         11 | Azithromycin                   | Antibiotic                |        1 | 1 tablet every 8 hours          | Once daily        | 30 days  |
+|             20 | 2026-02-13       |          2 | Kwame Adjei      |         22 | Prednisolone                   | Corticosteroid            |        3 | 2 puffs as needed               | Once daily        | 30 days  |
+|             21 | 2026-02-04       |         20 | Fiifi Acheampong |         19 | Doxycycline                    | Antibiotic                |        1 | 2 tablets twice daily           | Every 8 hours     | 3 days   |
+|             22 | 2026-01-26       |          4 | Kojo Yeboah      |         19 | Doxycycline                    | Antibiotic                |        5 | 1 capsule at bedtime            | Every 12 hours    | 3 days   |
+|             22 | 2026-01-26       |          4 | Kojo Yeboah      |         17 | Losartan                       | Antihypertensive          |       10 | 1 capsule at bedtime            | Three times daily | 14 days  |
+|             22 | 2026-01-26       |          4 | Kojo Yeboah      |         11 | Azithromycin                   | Antibiotic                |        2 | 5ml three times daily           | Every 8 hours     | 10 days  |
+|             23 | 2026-01-17       |          5 | Akosua Aidoo     |          1 | Amoxicillin                    | Antibiotic                |       20 | 2 tablets twice daily           | Once daily        | 30 days  |
+|             24 | 2026-01-08       |         25 | Mercy Appiah     |         17 | Losartan                       | Antihypertensive          |        5 | 1 tablet every 8 hours          | Three times daily | 5 days   |
+|             25 | 2025-12-30       |          2 | Kwame Adjei      |         12 | Salbutamol Inhaler             | Bronchodilator            |        5 | 1 tablet every 8 hours          | Every 8 hours     | 21 days  |
+|             26 | 2025-12-21       |         16 | Nana Boateng     |         23 | Folic Acid                     | Vitamin/Supplement        |       30 | 1 tablet after meals            | Every 12 hours    | 21 days  |
+|             26 | 2025-12-21       |         16 | Nana Boateng     |         10 | Ciprofloxacin                  | Antibiotic                |       30 | 5ml three times daily           | Every 12 hours    | 5 days   |
+|             26 | 2025-12-21       |         16 | Nana Boateng     |         20 | Hydrochlorothiazide            | Antihypertensive          |        2 | 5ml three times daily           | Once daily        | 5 days   |
+|             27 | 2025-12-12       |          1 | Ama Ofori        |          5 | Amlodipine                     | Antihypertensive          |        3 | 1 tablet in the morning         | Twice daily       | 3 days   |
+|             27 | 2025-12-12       |          1 | Ama Ofori        |          9 | Ranitidine                     | Antacid                   |        5 | 1 tablet twice daily with water | Three times daily | 21 days  |
+|             27 | 2025-12-12       |          1 | Ama Ofori        |         10 | Ciprofloxacin                  | Antibiotic                |        1 | 2 tablets twice daily           | Every 12 hours    | 14 days  |
+|             28 | 2025-12-03       |         13 | Afia Nkrumah     |          2 | Paracetamol                    | Painkiller                |       10 | 1 tablet every 8 hours          | Every 12 hours    | 10 days  |
+|             28 | 2025-12-03       |         13 | Afia Nkrumah     |          1 | Amoxicillin                    | Antibiotic                |        2 | 1 tablet twice daily with water | As needed         | 3 days   |
+|             29 | 2025-11-24       |          4 | Kojo Yeboah      |         18 | Metronidazole                  | Antibiotic                |        1 | 2 tablets twice daily           | Every 12 hours    | 7 days   |
+|             29 | 2025-11-24       |          4 | Kojo Yeboah      |          1 | Amoxicillin                    | Antibiotic                |       30 | 1 tablet after meals            | Three times daily | 30 days  |
+|             30 | 2025-11-15       |          7 | Abena Mensah     |          5 | Amlodipine                     | Antihypertensive          |        5 | 1 tablet in the morning         | Once daily        | 10 days  |
+|             30 | 2025-11-15       |          7 | Abena Mensah     |         14 | Multivitamin Complex           | Vitamin/Supplement        |        3 | 1 capsule at bedtime            | Every 12 hours    | 5 days   |
+|             30 | 2025-11-15       |          7 | Abena Mensah     |          2 | Paracetamol                    | Painkiller                |       10 | 2 puffs as needed               | As needed         | 3 days   |
++----------------+------------------+------------+------------------+------------+--------------------------------+---------------------------+----------+---------------------------------+-------------------+----------+
+57 rows in set (0.030 sec)
+
+MariaDB [pharmacy_db]>
+
+
+dispensing medicine:
+
+MariaDB [pharmacy_db]> DELIMITER //
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> CREATE PROCEDURE sp_dispense_medicine(
+    ->     IN p_MedicineID INT,
+    ->     IN p_Quantity INT
+    -> )
+    -> BEGIN
+    ->     DECLARE v_Stock INT;
+    ->     DECLARE v_ExpiryDate DATE;
+    ->
+    ->     SELECT StockQuantity, ExpiryDate
+    ->     INTO v_Stock, v_ExpiryDate
+    ->     FROM MEDICINE
+    ->     WHERE MedicineID = p_MedicineID;
+    ->
+    ->     IF v_Stock IS NULL THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Medicine does not exist';
+    ->
+    ->     ELSEIF v_ExpiryDate < CURDATE() THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Cannot dispense expired medicine';
+    ->
+    ->     ELSEIF p_Quantity <= 0 THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Quantity must be greater than zero';
+    ->
+    ->     ELSEIF v_Stock < p_Quantity THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Insufficient stock';
+    ->
+    ->     ELSE
+    ->         UPDATE MEDICINE
+    ->         SET StockQuantity = StockQuantity - p_Quantity
+    ->         WHERE MedicineID = p_MedicineID;
+    ->
+    ->         SELECT
+    ->             MedicineID,
+    ->             MedicineName,
+    ->             StockQuantity AS RemainingStock
+    ->         FROM MEDICINE
+    ->         WHERE MedicineID = p_MedicineID;
+    ->     END IF;
+    -> END //
+Query OK, 0 rows affected (0.004 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> DELIMITER ;
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> CALL sp_dispense_medicine(1, 5);
++------------+--------------+----------------+
+| MedicineID | MedicineName | RemainingStock |
++------------+--------------+----------------+
+|          1 | Amoxicillin  |            415 |
++------------+--------------+----------------+
+1 row in set (0.003 sec)
+
+Query OK, 2 rows affected (0.004 sec)
+
+MariaDB [pharmacy_db]>
+
+
+2. Process Purchase Order
+MariaDB [pharmacy_db]> DELIMITER //
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> CREATE PROCEDURE sp_process_purchase_order(
+    ->     IN p_SupplierID INT,
+    ->     IN p_MedicineID INT,
+    ->     IN p_QuantityPurchased INT,
+    ->     IN p_UnitCost DECIMAL(10,2)
+    -> )
+    -> BEGIN
+    ->     DECLARE v_PurchaseID INT;
+    ->
+    ->     IF p_QuantityPurchased <= 0 THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Quantity purchased must be greater than zero';
+    ->
+    ->     ELSEIF p_UnitCost < 0 THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Unit cost cannot be negative';
+    ->
+    ->     ELSE
+    ->         INSERT INTO PURCHASE (PurchaseDate, SupplierID)
+    ->         VALUES (CURDATE(), p_SupplierID);
+    ->
+    ->         SET v_PurchaseID = LAST_INSERT_ID();
+    ->
+    ->         INSERT INTO PURCHASE_ITEM
+    ->         (
+    ->             PurchaseID,
+    ->             MedicineID,
+    ->             QuantityPurchased,
+    ->             UnitCost
+    ->         )
+    ->         VALUES
+    ->         (
+    ->             v_PurchaseID,
+    ->             p_MedicineID,
+    ->             p_QuantityPurchased,
+    ->             p_UnitCost
+    ->         );
+    ->
+    ->         UPDATE MEDICINE
+    ->         SET StockQuantity = StockQuantity + p_QuantityPurchased
+    ->         WHERE MedicineID = p_MedicineID;
+    ->
+    ->         SELECT
+    ->             v_PurchaseID AS PurchaseID,
+    ->             p_MedicineID AS MedicineID,
+    ->             p_QuantityPurchased AS QuantityPurchased,
+    ->             p_UnitCost AS UnitCost;
+    ->     END IF;
+    -> END //
+Query OK, 0 rows affected (0.007 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> DELIMITER ;
+MariaDB [pharmacy_db]> CALL sp_process_purchase_order(3, 10, 100, 0.50);
++------------+------------+-------------------+----------+
+| PurchaseID | MedicineID | QuantityPurchased | UnitCost |
++------------+------------+-------------------+----------+
+|         26 |         10 |               100 |     0.50 |
++------------+------------+-------------------+----------+
+1 row in set (0.003 sec)
+
+Query OK, 3 rows affected (0.005 sec)
+
+MariaDB [pharmacy_db]>
+
+3. Generate Stock Alert
+MariaDB [pharmacy_db]> DELIMITER //
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> CREATE PROCEDURE sp_generate_stock_alert(
+    ->     IN p_StockThreshold INT
+    -> )
+    -> BEGIN
+    ->     SELECT
+    ->         m.MedicineID,
+    ->         m.MedicineName,
+    ->         m.Category,
+    ->         m.StockQuantity,
+    ->         s.SupplierName,
+    ->         s.ContactNumber
+    ->     FROM MEDICINE m
+    ->     JOIN SUPPLIER s
+    ->         ON m.SupplierID = s.SupplierID
+    ->     WHERE m.StockQuantity <= p_StockThreshold
+    ->     ORDER BY m.StockQuantity ASC;
+    -> END //
+Query OK, 0 rows affected (0.005 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> DELIMITER ;
+MariaDB [pharmacy_db]> CALL sp_generate_stock_alert(10);
++------------+------------------+--------------+---------------+--------------------------+---------------+
+| MedicineID | MedicineName     | Category     | StockQuantity | SupplierName             | ContactNumber |
++------------+------------------+--------------+---------------+--------------------------+---------------+
+|          9 | Ranitidine       | Antacid      |             0 | Kumasi Pharma Traders    | 0322-551-209  |
+|         18 | Metronidazole    | Antibiotic   |             0 | GlobalMeds Supply Co.    | 0302-551-203  |
+|         27 | Co-trimoxazole   | Antibiotic   |             3 | GlobalMeds Supply Co.    | 0302-551-203  |
+|         16 | Insulin Glargine | Antidiabetic |             8 | Accra Pharma Wholesalers | 0302-551-205  |
++------------+------------------+--------------+---------------+--------------------------+---------------+
+4 rows in set (0.001 sec)
+
+Query OK, 0 rows affected (0.009 sec)
+
+MariaDB [pharmacy_db]>
+
+
+
+1. Function to Check Prescription Validity:
+MariaDB [pharmacy_db]> DELIMITER //
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> CREATE FUNCTION fn_check_prescription_validity(
+    ->     p_PrescriptionID INT
+    -> )
+    -> RETURNS VARCHAR(20)
+    -> DETERMINISTIC
+    -> BEGIN
+    ->     DECLARE v_PrescriptionDate DATE;
+    ->     DECLARE v_DurationDays INT;
+    ->
+    ->     SELECT
+    ->         PrescriptionDate,
+    ->         CAST(SUBSTRING_INDEX(Duration, ' ', 1) AS UNSIGNED)
+    ->     INTO
+    ->         v_PrescriptionDate,
+    ->         v_DurationDays
+    ->     FROM PRESCRIPTION
+    ->     WHERE PrescriptionID = p_PrescriptionID;
+    ->
+    ->     IF v_PrescriptionDate IS NULL THEN
+    ->         RETURN 'NOT FOUND';
+    ->
+    ->     ELSEIF CURDATE() <= DATE_ADD(
+    ->         v_PrescriptionDate,
+    ->         INTERVAL v_DurationDays DAY
+    ->     ) THEN
+    ->         RETURN 'VALID';
+    ->
+    ->     ELSE
+    ->         RETURN 'EXPIRED';
+    ->     END IF;
+    -> END //
+Query OK, 0 rows affected (0.006 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> DELIMITER ;
+MariaDB [pharmacy_db]> SELECT fn_check_prescription_validity(1);
++-----------------------------------+
+| fn_check_prescription_validity(1) |
++-----------------------------------+
+| VALID                             |
++-----------------------------------+
+1 row in set (0.003 sec)
+
+MariaDB [pharmacy_db]>
+
+
+to check for several prescriptions:
+
+MariaDB [pharmacy_db]> SELECT
+    ->     PrescriptionID,
+    ->     PrescriptionDate,
+    ->     Duration,
+    ->     fn_check_prescription_validity(PrescriptionID) AS Status
+    -> FROM PRESCRIPTION;
++----------------+------------------+----------+---------+
+| PrescriptionID | PrescriptionDate | Duration | Status  |
++----------------+------------------+----------+---------+
+|              1 | 2026-08-03       | 30 days  | VALID   |
+|              2 | 2026-07-25       | 3 days   | EXPIRED |
+|              3 | 2026-07-16       | 5 days   | EXPIRED |
+|              4 | 2026-07-07       | 21 days  | EXPIRED |
+|              5 | 2026-06-28       | 5 days   | EXPIRED |
+|              6 | 2026-06-19       | 21 days  | EXPIRED |
+|              7 | 2026-06-10       | 14 days  | EXPIRED |
+|              8 | 2026-06-01       | 14 days  | EXPIRED |
+|              9 | 2026-05-23       | 7 days   | EXPIRED |
+|             10 | 2026-05-14       | 10 days  | EXPIRED |
+|             11 | 2026-05-05       | 3 days   | EXPIRED |
+|             12 | 2026-04-26       | 3 days   | EXPIRED |
+|             13 | 2026-04-17       | 30 days  | EXPIRED |
+|             14 | 2026-04-08       | 30 days  | EXPIRED |
+|             15 | 2026-03-30       | 7 days   | EXPIRED |
+|             16 | 2026-03-21       | 14 days  | EXPIRED |
+|             17 | 2026-03-12       | 3 days   | EXPIRED |
+|             18 | 2026-03-03       | 3 days   | EXPIRED |
+|             19 | 2026-02-22       | 21 days  | EXPIRED |
+|             20 | 2026-02-13       | 7 days   | EXPIRED |
+|             21 | 2026-02-04       | 21 days  | EXPIRED |
+|             22 | 2026-01-26       | 14 days  | EXPIRED |
+|             23 | 2026-01-17       | 5 days   | EXPIRED |
+|             24 | 2026-01-08       | 30 days  | EXPIRED |
+|             25 | 2025-12-30       | 7 days   | EXPIRED |
+|             26 | 2025-12-21       | 14 days  | EXPIRED |
+|             27 | 2025-12-12       | 7 days   | EXPIRED |
+|             28 | 2025-12-03       | 7 days   | EXPIRED |
+|             29 | 2025-11-24       | 3 days   | EXPIRED |
+|             30 | 2025-11-15       | 3 days   | EXPIRED |
++----------------+------------------+----------+---------+
+30 rows in set (0.002 sec)
+
+MariaDB [pharmacy_db]>
+
+
+
+2. Function to Calculate Prescription Cost
+MariaDB [pharmacy_db]> DELIMITER //
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> CREATE FUNCTION fn_calculate_prescription_cost(
+    ->     p_PrescriptionID INT
+    -> )
+    -> RETURNS DECIMAL(10,2)
+    -> DETERMINISTIC
+    -> BEGIN
+    ->     DECLARE v_TotalCost DECIMAL(10,2);
+    ->
+    ->     SELECT COALESCE(
+    ->         SUM(pi.Quantity * m.UnitPrice),
+    ->         0
+    ->     )
+    ->     INTO v_TotalCost
+    ->     FROM PRESCRIPTION_ITEM pi
+    ->     JOIN MEDICINE m
+    ->         ON pi.MedicineID = m.MedicineID
+    ->     WHERE pi.PrescriptionID = p_PrescriptionID;
+    ->
+    ->     RETURN v_TotalCost;
+    -> END //
+Query OK, 0 rows affected (0.003 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> DELIMITER ;
+MariaDB [pharmacy_db]> SELECT fn_calculate_prescription_cost(1);
++-----------------------------------+
+| fn_calculate_prescription_cost(1) |
++-----------------------------------+
+|                              7.32 |
++-----------------------------------+
+1 row in set (0.001 sec)
+
+MariaDB [pharmacy_db]>
+
+
+
+complete testing section:
+MariaDB [pharmacy_db]> SELECT fn_check_prescription_validity(1);
++-----------------------------------+
+| fn_check_prescription_validity(1) |
++-----------------------------------+
+| VALID                             |
++-----------------------------------+
+1 row in set (0.002 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> SELECT fn_calculate_prescription_cost(1);
++-----------------------------------+
+| fn_calculate_prescription_cost(1) |
++-----------------------------------+
+|                              7.32 |
++-----------------------------------+
+1 row in set (0.001 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> SELECT
+    ->     PrescriptionID,
+    ->     fn_check_prescription_validity(PrescriptionID) AS PrescriptionStatus,
+    ->     fn_calculate_prescription_cost(PrescriptionID) AS TotalCost
+    -> FROM PRESCRIPTION;
++----------------+--------------------+-----------+
+| PrescriptionID | PrescriptionStatus | TotalCost |
++----------------+--------------------+-----------+
+|             30 | EXPIRED            |      3.35 |
+|             29 | EXPIRED            |     13.70 |
+|             28 | EXPIRED            |      1.90 |
+|             27 | EXPIRED            |      3.00 |
+|             26 | EXPIRED            |     19.86 |
+|             25 | EXPIRED            |     16.00 |
+|             24 | EXPIRED            |      1.90 |
+|             23 | EXPIRED            |      9.00 |
+|             22 | EXPIRED            |      6.90 |
+|             21 | EXPIRED            |      0.32 |
+|             20 | EXPIRED            |      0.78 |
+|             19 | EXPIRED            |     54.85 |
+|             18 | EXPIRED            |     17.50 |
+|             17 | EXPIRED            |      0.12 |
+|             16 | EXPIRED            |     10.90 |
+|             15 | EXPIRED            |      5.60 |
+|             14 | EXPIRED            |      6.60 |
+|             13 | EXPIRED            |      1.40 |
+|             12 | EXPIRED            |    255.16 |
+|             11 | EXPIRED            |      1.59 |
+|             10 | EXPIRED            |      0.15 |
+|              9 | EXPIRED            |      0.75 |
+|              8 | EXPIRED            |     31.08 |
+|              7 | EXPIRED            |     10.20 |
+|              6 | EXPIRED            |      5.40 |
+|              5 | EXPIRED            |      6.00 |
+|              4 | EXPIRED            |     11.25 |
+|              3 | EXPIRED            |      6.06 |
+|              2 | EXPIRED            |      4.76 |
+|              1 | VALID              |      7.32 |
++----------------+--------------------+-----------+
+30 rows in set (0.002 sec)
+
+MariaDB [pharmacy_db]>
+
+
+table to record dispensing transaction:
+MariaDB [pharmacy_db]> CREATE TABLE IF NOT EXISTS DISPENSE (
+    ->     DispenseID INT AUTO_INCREMENT PRIMARY KEY,
+    ->     MedicineID INT NOT NULL,
+    ->     Quantity INT NOT NULL,
+    ->     DispenseDate DATE NOT NULL,
+    ->     FOREIGN KEY (MedicineID) REFERENCES MEDICINE(MedicineID)
+    -> );
+Query OK, 0 rows affected (0.005 sec)
+
+
+
+trigger1 :Automatically Update Stock When Medicine Is Dispensed:
+
+
+MariaDB [pharmacy_db]> DELIMITER //
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> CREATE TRIGGER trg_after_dispense
+    -> AFTER INSERT ON DISPENSE
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     UPDATE MEDICINE
+    ->     SET StockQuantity = StockQuantity - NEW.Quantity
+    ->     WHERE MedicineID = NEW.MedicineID;
+    -> END //
+Query OK, 0 rows affected (0.005 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> DELIMITER ;
+MariaDB [pharmacy_db]> SELECT MedicineID, MedicineName, StockQuantity
+    -> FROM MEDICINE
+    -> WHERE MedicineID = 1;
++------------+--------------+---------------+
+| MedicineID | MedicineName | StockQuantity |
++------------+--------------+---------------+
+|          1 | Amoxicillin  |           415 |
++------------+--------------+---------------+
+1 row in set (0.001 sec)
+
+MariaDB [pharmacy_db]>
+
+
+to dispense 5:
+MariaDB [pharmacy_db]> INSERT INTO DISPENSE (MedicineID, Quantity, DispenseDate)
+    -> VALUES (1, 5, CURDATE());
+Query OK, 1 row affected (0.006 sec)
+
+
+to check:
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> SELECT MedicineID, MedicineName, StockQuantity
+    -> FROM MEDICINE
+    -> WHERE MedicineID = 1;
++------------+--------------+---------------+
+| MedicineID | MedicineName | StockQuantity |
++------------+--------------+---------------+
+|          1 | Amoxicillin  |           410 |
++------------+--------------+---------------+
+1 row in set (0.001 sec)
+
+
+
+Trigger 2 to Block Dispensing of Expired Medicine:
+MariaDB [pharmacy_db]> DELIMITER //
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> CREATE TRIGGER trg_before_dispense
+    -> BEFORE INSERT ON DISPENSE
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     DECLARE v_ExpiryDate DATE;
+    ->     DECLARE v_Stock INT;
+    ->
+    ->     SELECT ExpiryDate, StockQuantity
+    ->     INTO v_ExpiryDate, v_Stock
+    ->     FROM MEDICINE
+    ->     WHERE MedicineID = NEW.MedicineID;
+    ->
+    ->     IF v_ExpiryDate < CURDATE() THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Cannot dispense expired medicine';
+    ->
+    ->     ELSEIF NEW.Quantity <= 0 THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Dispensing quantity must be greater than zero';
+    ->
+    ->     ELSEIF v_Stock < NEW.Quantity THEN
+    ->         SIGNAL SQLSTATE '45000'
+    ->         SET MESSAGE_TEXT = 'Insufficient stock';
+    ->     END IF;
+    -> END //
+Query OK, 0 rows affected (0.009 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> DELIMITER ;
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> INSERT INTO DISPENSE (MedicineID, Quantity, DispenseDate)
+    -> VALUES (22, 5, CURDATE());
+ERROR 1644 (45000): Cannot dispense expired medicine
+MariaDB [pharmacy_db]>
+
+
+
+trigger3: Audit Medicine Stock Changes
+MariaDB [pharmacy_db]> CREATE TABLE IF NOT EXISTS MEDICINE_STOCK_AUDIT (
+    ->     AuditID INT AUTO_INCREMENT PRIMARY KEY,
+    ->     MedicineID INT NOT NULL,
+    ->     OldStock INT,
+    ->     NewStock INT,
+    ->     ChangeAmount INT,
+    ->     ChangeDate DATETIME,
+    ->     ActionType VARCHAR(50)
+    -> );
+Query OK, 0 rows affected (0.008 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> DELIMITER //
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> CREATE TRIGGER trg_medicine_stock_audit
+    -> AFTER UPDATE ON MEDICINE
+    -> FOR EACH ROW
+    -> BEGIN
+    ->     IF OLD.StockQuantity <> NEW.StockQuantity THEN
+    ->
+    ->         INSERT INTO MEDICINE_STOCK_AUDIT
+    ->         (
+    ->             MedicineID,
+    ->             OldStock,
+    ->             NewStock,
+    ->             ChangeAmount,
+    ->             ChangeDate,
+    ->             ActionType
+    ->         )
+    ->         VALUES
+    ->         (
+    ->             NEW.MedicineID,
+    ->             OLD.StockQuantity,
+    ->             NEW.StockQuantity,
+    ->             NEW.StockQuantity - OLD.StockQuantity,
+    ->             NOW(),
+    ->             'STOCK CHANGE'
+    ->         );
+    ->
+    ->     END IF;
+    -> END //
+Query OK, 0 rows affected (0.005 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> DELIMITER ;
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> UPDATE MEDICINE
+    -> SET StockQuantity = StockQuantity + 10
+    -> WHERE MedicineID = 1;
+Query OK, 1 row affected (0.005 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [pharmacy_db]>
+
+MariaDB [pharmacy_db]> SELECT *
+    -> FROM MEDICINE_STOCK_AUDIT
+    -> ORDER BY AuditID DESC;
++---------+------------+----------+----------+--------------+---------------------+--------------+
+| AuditID | MedicineID | OldStock | NewStock | ChangeAmount | ChangeDate          | ActionType   |
++---------+------------+----------+----------+--------------+---------------------+--------------+
+|       2 |          1 |      420 |      430 |           10 | 2026-08-13 22:38:06 | STOCK CHANGE |
+|       1 |          1 |      410 |      420 |           10 | 2026-08-13 22:35:08 | STOCK CHANGE |
++---------+------------+----------+----------+--------------+---------------------+--------------+
+2 rows in set (0.001 sec)
+
+MariaDB [pharmacy_db]>
+
+
+phase 7: security implementation:
+
+### assigning roles ###
+
+
+MariaDB [pharmacy_db]> CREATE ROLE IF NOT EXISTS pharmacist_role;
+Query OK, 0 rows affected (0.009 sec)
+
+MariaDB [pharmacy_db]> CREATE ROLE IF NOT EXISTS cashier_role;
+Query OK, 0 rows affected (0.002 sec)
+
+MariaDB [pharmacy_db]> CREATE ROLE IF NOT EXISTS inventory_manager_role;
+Query OK, 0 rows affected (0.001 sec)
+
+MariaDB [pharmacy_db]> CREATE ROLE IF NOT EXISTS admin_role;
+Query OK, 0 rows affected (0.004 sec)
+
+MariaDB [pharmacy_db]>
+
+
+
+
+##2. Give the inventory manager access:##
+
+MariaDB [pharmacy_db]> GRANT SELECT ON pharmacy_db.vw_medicines_expiring_soon
+    -> TO inventory_manager_role;
+Query OK, 0 rows affected (0.011 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> GRANT SELECT ON pharmacy_db.vw_low_stock_alert
+    -> TO inventory_manager_role;
+Query OK, 0 rows affected (0.001 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> GRANT SELECT ON pharmacy_db.vw_supplier_purchase_history
+    -> TO inventory_manager_role;
+Query OK, 0 rows affected (0.000 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> GRANT EXECUTE ON PROCEDURE pharmacy_db.sp_generate_stock_alert
+    -> TO inventory_manager_role;
+Query OK, 0 rows affected (0.006 sec)
+
+MariaDB [pharmacy_db]> system
+ERROR: Usage: \! shell-command
+MariaDB [pharmacy_db]>
+
+
+## 3: Give the Pharmacist access: ##
+
+MariaDB [pharmacy_db]> GRANT SELECT ON pharmacy_db.vw_customer_prescription_history
+    -> TO pharmacist_role;
+Query OK, 0 rows affected (0.003 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> GRANT SELECT ON pharmacy_db.vw_prescription_medicine_details
+    -> TO pharmacist_role;
+Query OK, 0 rows affected (0.001 sec)
+
+MariaDB [pharmacy_db]>
+MariaDB [pharmacy_db]> GRANT EXECUTE ON PROCEDURE pharmacy_db.sp_dispense_medicine
+    -> TO pharmacist_role;
+Query OK, 0 rows affected (0.005 sec)
+
+MariaDB [pharmacy_db]>
+
+
+
+
+##4: For now, giving the cashier access to the prescription cost information:##
+MariaDB [pharmacy_db]> GRANT SELECT ON pharmacy_db.vw_prescription_medicine_details
+    -> TO cashier_role;
+Query OK, 0 rows affected (0.003 sec)
+
+MariaDB [pharmacy_db]>
+
+
+###5: Administrator
+The administrator manages the database and its security configuration.
+For a project demonstration, we assign the administrator broad privileges:####
+
+MariaDB [pharmacy_db]> GRANT ALL PRIVILEGES ON pharmacy_db.*
+    -> TO admin_role;
+Query OK, 0 rows affected (0.005 sec)
+
+MariaDB [pharmacy_db]>
+
+
+### 6: Check that the privileges worked##
+
+MariaDB [pharmacy_db]> SHOW GRANTS FOR pharmacist_role;
++---------------------------------------------------------------------------------------+
+| Grants for pharmacist_role                                                            |
++---------------------------------------------------------------------------------------+
+| GRANT USAGE ON *.* TO `pharmacist_role`                                               |
+| GRANT SELECT ON `pharmacy_db`.`vw_prescription_medicine_details` TO `pharmacist_role` |
+| GRANT SELECT ON `pharmacy_db`.`vw_customer_prescription_history` TO `pharmacist_role` |
+| GRANT EXECUTE ON PROCEDURE `pharmacy_db`.`sp_dispense_medicine` TO `pharmacist_role`  |
++---------------------------------------------------------------------------------------+
+4 rows in set (0.008 sec)
+
+MariaDB [pharmacy_db]> SHOW GRANTS FOR cashier_role;
++------------------------------------------------------------------------------------+
+| Grants for cashier_role                                                            |
++------------------------------------------------------------------------------------+
+| GRANT USAGE ON *.* TO `cashier_role`                                               |
+| GRANT SELECT ON `pharmacy_db`.`vw_prescription_medicine_details` TO `cashier_role` |
++------------------------------------------------------------------------------------+
+2 rows in set (0.002 sec)
+
+MariaDB [pharmacy_db]> SHOW GRANTS FOR inventory_manager_role;
++------------------------------------------------------------------------------------------------+
+| Grants for inventory_manager_role                                                              |
++------------------------------------------------------------------------------------------------+
+| GRANT USAGE ON *.* TO `inventory_manager_role`                                                 |
+| GRANT SELECT ON `pharmacy_db`.`vw_medicines_expiring_soon` TO `inventory_manager_role`         |
+| GRANT SELECT ON `pharmacy_db`.`vw_supplier_purchase_history` TO `inventory_manager_role`       |
+| GRANT SELECT ON `pharmacy_db`.`vw_low_stock_alert` TO `inventory_manager_role`                 |
+| GRANT EXECUTE ON PROCEDURE `pharmacy_db`.`sp_generate_stock_alert` TO `inventory_manager_role` |
++------------------------------------------------------------------------------------------------+
+5 rows in set (0.001 sec)
+
+MariaDB [pharmacy_db]> SHOW GRANTS FOR admin_role;
++---------------------------------------------------------+
+| Grants for admin_role                                   |
++---------------------------------------------------------+
+| GRANT USAGE ON *.* TO `admin_role`                      |
+| GRANT ALL PRIVILEGES ON `pharmacy_db`.* TO `admin_role` |
++---------------------------------------------------------+
+2 rows in set (0.004 sec)
+
+MariaDB [pharmacy_db]>
+
+
+
+
+MariaDB [pharmacy_db]> SELECT User, Host
+    -> FROM mysql.user
+    -> WHERE User IN (
+    ->     'pharmacist_role',
+    ->     'cashier_role',
+    ->     'inventory_manager_role',
+    ->     'admin_role'
+    -> );
++------------------------+------+
+| User                   | Host |
++------------------------+------+
+| admin_role             |      |
+| cashier_role           |      |
+| inventory_manager_role |      |
+| pharmacist_role        |      |
++------------------------+------+
+4 rows in set (0.033 sec)
+
+MariaDB [pharmacy_db]>
+
+
+
+
+
+
+
+
+
+
+
+
