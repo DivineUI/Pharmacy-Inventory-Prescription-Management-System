@@ -1,54 +1,82 @@
 """
 app.py
-Pharmacy Inventory & Prescription Management System.
-
+Pharmacy Inventory & Prescription Management System (PIPMS).
 """
 
-import sqlite3
+import base64
 from datetime import date
-
 import streamlit as st
-
 import database
 from entities import ENTITIES, NAV, singular
 from permissions import ROLES, can, can_read
 
 st.set_page_config(page_title="PIPMS — Pharmacy Inventory & Prescriptions", layout="wide")
 
-# Session state / DB bootstrap
+# Set local background image if present
+def set_local_background(image_file):
+    try:
+        with open(image_file, "rb") as file:
+            encoded = base64.b64encode(file.read()).decode()
+        
+        st.markdown(
+            f"""
+            <style>
+            .stApp {{
+                background: linear-gradient(rgba(14, 17, 23, 0.85), rgba(14, 17, 23, 0.85)), 
+                            url("data:image/png;base64,{encoded}");
+                background-attachment: fixed;
+                background-size: cover;
+                background-position: center;
+            }}
+            [data-testid="stSidebar"] {{
+                background-color: rgba(18, 18, 24, 0.88) !important;
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+    except FileNotFoundError:
+        pass  # Skip gracefully if file isn't present in environment
 
-if "conn" not in st.session_state:
-    st.session_state.conn = database.build_connection()
+set_local_background("bg_pharmacy.jpg")
+
+# Session state initialization
+
+if "role" not in st.session_state:
     st.session_state.role = "Admin"
+if "section" not in st.session_state:
     st.session_state.section = "DASHBOARD"
+if "search" not in st.session_state:
     st.session_state.search = {}
+if "active_filters" not in st.session_state:
     st.session_state.active_filters = {}
+if "form_mode" not in st.session_state:
     st.session_state.form_mode = None          # ("add"|"edit", entity_key, pk_or_None, presets_or_None)
+if "confirm_delete" not in st.session_state:
     st.session_state.confirm_delete = None      # (entity_key, pk)
+if "drill" not in st.session_state:
     st.session_state.drill = None               # ("prescription_items"|"purchase_items", parent_id)
-
-conn: sqlite3.Connection = st.session_state.conn
 
 
 def friendly_sql_error(err: Exception) -> str:
     msg = str(err)
-    if "FOREIGN KEY constraint failed" in msg:
+    if "FOREIGN KEY" in msg or "foreign key" in msg:
         return "Can't complete this — other records still reference this record."
     if "expired" in msg:
-        return msg.split("Cannot dispense", 1)[-1].strip() and "Cannot dispense: this medicine batch has expired"
+        return "Cannot dispense: this medicine batch has expired"
     if "not enough stock" in msg:
         return "Cannot dispense: not enough stock on hand"
-    if "CHECK constraint failed" in msg:
+    if "CHECK constraint" in msg or "check constraint" in msg:
         return "That value violates a database rule (e.g. quantity or price can't be negative)."
-    if "UNIQUE constraint failed" in msg:
+    if "Duplicate entry" in msg or "UNIQUE constraint" in msg:
         return "That value is already in use (must be unique)."
     return f"Something went wrong: {msg}"
 
 
-# Sidebar: brand, role switcher, nav
+# Sidebar navigation
 
 with st.sidebar:
-    st.markdown("### \u211E PIPMS")
+    st.markdown("### ℞ PIPMS")
     st.caption("Pharmacy Inventory & Prescriptions")
     st.divider()
 
@@ -61,7 +89,7 @@ with st.sidebar:
         st.rerun()
 
     access_note = "full access" if st.session_state.role == "Admin" else "scoped access"
-    st.caption(f"**{st.session_state.role}** \u00b7 {access_note}")
+    st.caption(f"**{st.session_state.role}** · {access_note}")
     st.divider()
 
     for group_label, items in NAV:
@@ -79,7 +107,7 @@ with st.sidebar:
                 st.rerun()
 
     st.divider()
-    st.caption("SQLite (Python stdlib), seeded from the project's Phase 3-5 schema & data.")
+    st.caption("Shared MariaDB database on Railway.")
 
 # Add / Edit form
 def render_form():
@@ -88,7 +116,7 @@ def render_form():
     is_edit = mode == "edit"
     record = {}
     if is_edit:
-        record = database.query_one(conn, f"SELECT * FROM {entity_key} WHERE {ent['pk']} = ?", (pk,)) or {}
+        record = database.query_one(f"SELECT * FROM {entity_key} WHERE {ent['pk']} = :pk", {"pk": pk}) or {}
     elif presets:
         record = dict(presets)
 
@@ -102,7 +130,7 @@ def render_form():
             locked = presets is not None and key in presets and not is_edit
             if f["type"] == "fk":
                 options = database.query(
-                    conn, f"SELECT {f['fk_pk']} AS id, ({f['fk_label_sql']}) AS lbl FROM {f['fk_entity']} ORDER BY lbl"
+                    f"SELECT {f['fk_pk']} AS id, ({f['fk_label_sql']}) AS lbl FROM {f['fk_entity']} ORDER BY lbl"
                 )
                 ids = [o["id"] for o in options]
                 labels = {o["id"]: o["lbl"] for o in options}
@@ -118,7 +146,7 @@ def render_form():
                     )
                     values[key] = choice
             elif f["type"] == "date":
-                default = date.fromisoformat(current) if current else date.today()
+                default = date.fromisoformat(str(current)) if current else date.today()
                 values[key] = st.date_input(f["label"] + (" *" if f.get("required") else ""), value=default,
                                              key=f"fld_{entity_key}_{key}_{pk}")
             elif f["type"] == "int":
@@ -157,25 +185,23 @@ def render_form():
         try:
             if not is_edit:
                 cols = list(clean.keys())
-                placeholders = ",".join(["?"] * len(cols))
-                database.execute(conn, f"INSERT INTO {entity_key} ({','.join(cols)}) VALUES ({placeholders})",
-                                  [clean[c] for c in cols])
+                placeholders = ",".join([f":{c}" for c in cols])
+                database.execute(f"INSERT INTO {entity_key} ({','.join(cols)}) VALUES ({placeholders})", clean)
                 st.success(f"{singular(ent['label'])} added.")
             else:
                 cols = list(clean.keys())
-                set_clause = ",".join(f"{c}=?" for c in cols)
-                database.execute(conn, f"UPDATE {entity_key} SET {set_clause} WHERE {ent['pk']}=?",
-                                  [clean[c] for c in cols] + [pk])
+                set_clause = ",".join([f"{c}=:{c}" for c in cols])
+                clean["pk"] = pk
+                database.execute(f"UPDATE {entity_key} SET {set_clause} WHERE {ent['pk']} = :pk", clean)
                 st.success(f"{singular(ent['label'])} updated.")
             st.session_state.form_mode = None
             st.rerun()
-        except sqlite3.Error as e:
+        except Exception as e:
             st.error(friendly_sql_error(e))
 
 
-# ---------------------------------------------------------------------------
-# Generic entity table + toolbar
-# ---------------------------------------------------------------------------
+# Table rendering
+
 def render_table(ent, rows, entity_key, can_update, can_delete):
     if not rows:
         st.info("No matching records.")
@@ -195,7 +221,7 @@ def render_table(ent, rows, entity_key, can_update, can_delete):
         cells = st.columns(weights)
         for c, col in zip(cells, ent["columns"]):
             val = row.get(col["key"])
-            c.write(col["fmt"](val) if col.get("fmt") else (val if val is not None else "\u2014"))
+            c.write(col["fmt"](val) if col.get("fmt") else (val if val is not None else "—"))
         if show_actions:
             with cells[-1]:
                 b1, b2, b3 = st.columns(3)
@@ -234,9 +260,9 @@ def render_entity(entity_key):
         cc1, cc2 = st.columns(2)
         if cc1.button("Yes, delete", type="primary", key=f"confirm_del_{entity_key}_{pk}"):
             try:
-                database.execute(conn, f"DELETE FROM {entity_key} WHERE {ent['pk']} = ?", (pk,))
+                database.execute(f"DELETE FROM {entity_key} WHERE {ent['pk']} = :pk", {"pk": pk})
                 st.success(f"{singular(ent['label'])} deleted.")
-            except sqlite3.Error as e:
+            except Exception as e:
                 st.error(friendly_sql_error(e))
             st.session_state.confirm_delete = None
             st.rerun()
@@ -250,10 +276,10 @@ def render_entity(entity_key):
         return
 
     toolbar = st.columns([3] + [1] * len(ent["filters"]) + [1])
-    search_val = toolbar[0].text_input(f"Search {ent['label'].lower()}\u2026",
+    search_val = toolbar[0].text_input(f"Search {ent['label'].lower()}…",
                                         value=st.session_state.search.get(entity_key, ""),
                                         key=f"search_{entity_key}", label_visibility="collapsed",
-                                        placeholder=f"Search {ent['label'].lower()}\u2026")
+                                        placeholder=f"Search {ent['label'].lower()}…")
     st.session_state.search[entity_key] = search_val
 
     active = st.session_state.active_filters.setdefault(entity_key, {})
@@ -266,7 +292,7 @@ def render_entity(entity_key):
             st.session_state.form_mode = ("add", entity_key, None, None)
             st.rerun()
 
-    rows = database.query(conn, ent["list_sql"])
+    rows = database.query(ent["list_sql"])
     if search_val.strip():
         t = search_val.strip().lower()
         rows = [r for r in rows if any(t in str(r.get(k, "") or "").lower() for k in ent["search_keys"])]
@@ -278,13 +304,11 @@ def render_entity(entity_key):
     render_table(ent, rows, entity_key, can_update, can_delete)
 
 
-# ---------------------------------------------------------------------------
-# Drill-down views (prescription items / purchase items for one parent row)
-# ---------------------------------------------------------------------------
+# Drill-down views
+
 def render_prescription_items(rx_id):
-    ent = ENTITIES["PRESCRIPTION_ITEM"]
     st.title(f"Items for Prescription #{rx_id}")
-    if st.button("\u2190 All prescriptions"):
+    if st.button("← All prescriptions"):
         st.session_state.drill = None
         st.rerun()
 
@@ -298,9 +322,9 @@ def render_prescription_items(rx_id):
             st.session_state.form_mode = ("add", "PRESCRIPTION_ITEM", None, {"PrescriptionID": rx_id})
             st.rerun()
 
-    rows = database.query(conn, """SELECT MedicineName, Quantity, pi.Dosage, Frequency, pi.Duration
-                                    FROM PRESCRIPTION_ITEM pi JOIN MEDICINE m ON pi.MedicineID = m.MedicineID
-                                    WHERE pi.PrescriptionID = ? ORDER BY pi.PrescriptionItemID""", (rx_id,))
+    rows = database.query("""SELECT MedicineName, Quantity, pi.Dosage, Frequency, pi.Duration
+                              FROM PRESCRIPTION_ITEM pi JOIN MEDICINE m ON pi.MedicineID = m.MedicineID
+                              WHERE pi.PrescriptionID = :rx_id ORDER BY pi.PrescriptionItemID""", {"rx_id": rx_id})
     st.caption(f"{len(rows)} item(s) dispensed on this prescription.")
     if not rows:
         st.info("No items dispensed yet on this prescription.")
@@ -310,7 +334,7 @@ def render_prescription_items(rx_id):
 
 def render_purchase_items(po_id):
     st.title(f"Items for Purchase Order #{po_id}")
-    if st.button("\u2190 All purchases"):
+    if st.button("← All purchases"):
         st.session_state.drill = None
         st.rerun()
 
@@ -324,9 +348,9 @@ def render_purchase_items(po_id):
             st.session_state.form_mode = ("add", "PURCHASE_ITEM", None, {"PurchaseID": po_id})
             st.rerun()
 
-    rows = database.query(conn, """SELECT MedicineName, QuantityPurchased, UnitCost
-                                    FROM PURCHASE_ITEM pi JOIN MEDICINE m ON pi.MedicineID = m.MedicineID
-                                    WHERE pi.PurchaseID = ? ORDER BY pi.PurchaseItemID""", (po_id,))
+    rows = database.query("""SELECT MedicineName, QuantityPurchased, UnitCost
+                              FROM PURCHASE_ITEM pi JOIN MEDICINE m ON pi.MedicineID = m.MedicineID
+                              WHERE pi.PurchaseID = :po_id ORDER BY pi.PurchaseItemID""", {"po_id": po_id})
     st.caption(f"{len(rows)} line item(s) on this order.")
     if not rows:
         st.info("No items received yet on this order.")
@@ -334,19 +358,26 @@ def render_purchase_items(po_id):
         st.table(rows)
 
 
-# ---------------------------------------------------------------------------
 # Dashboard
-# ---------------------------------------------------------------------------
+
 def render_dashboard():
     st.title("Dashboard")
     st.caption("Overview of stock, prescriptions and alerts")
 
-    med_count = database.query_one(conn, "SELECT COUNT(*) AS n FROM MEDICINE")["n"]
-    cust_count = database.query_one(conn, "SELECT COUNT(*) AS n FROM CUSTOMER")["n"]
-    rx_count = database.query_one(conn, "SELECT COUNT(*) AS n FROM PRESCRIPTION")["n"]
-    stock_value = database.query_one(conn, "SELECT ROUND(SUM(UnitPrice*StockQuantity),2) AS v FROM MEDICINE")["v"] or 0
-    low = database.query(conn, "SELECT * FROM View_LowStock")
-    expiring = database.query(conn, "SELECT * FROM View_ExpiringMedicines")
+    med_res = database.query_one("SELECT COUNT(*) AS n FROM MEDICINE")
+    med_count = med_res["n"] if med_res else 0
+
+    cust_res = database.query_one("SELECT COUNT(*) AS n FROM CUSTOMER")
+    cust_count = cust_res["n"] if cust_res else 0
+
+    rx_res = database.query_one("SELECT COUNT(*) AS n FROM PRESCRIPTION")
+    rx_count = rx_res["n"] if rx_res else 0
+
+    val_res = database.query_one("SELECT ROUND(SUM(UnitPrice*StockQuantity),2) AS v FROM MEDICINE")
+    stock_value = val_res["v"] if (val_res and val_res["v"] is not None) else 0
+
+    low = database.query("SELECT * FROM View_LowStock")
+    expiring = database.query("SELECT * FROM View_ExpiringMedicines")
 
     c1, c2, c3, c4, c5, c6 = st.columns(6)
     c1.metric("Medicines tracked", med_count)
@@ -359,14 +390,14 @@ def render_dashboard():
     st.divider()
     col_a, col_b = st.columns(2)
     with col_a:
-        st.subheader("\u211E Low stock \u2014 reorder soon")
+        st.subheader("℞ Low stock — reorder soon")
         st.caption("View_LowStock")
         if low:
             st.table(low)
         else:
             st.info("Nothing is currently low on stock.")
     with col_b:
-        st.subheader("\u211E Expiring or expired batches")
+        st.subheader("℞ Expiring or expired batches")
         st.caption("View_ExpiringMedicines")
         if expiring:
             st.table(expiring)
@@ -374,9 +405,8 @@ def render_dashboard():
             st.info("Nothing expiring in the next 60 days.")
 
 
-# ---------------------------------------------------------------------------
-# Reports (Phase 6 views)
-# ---------------------------------------------------------------------------
+# Reports
+
 def render_reports():
     st.title("Reports")
     st.caption("Live views over the pharmacy database")
@@ -393,21 +423,22 @@ def render_reports():
          'SELECT SupplierName AS Supplier, MedicineName AS Medicine, QuantityPurchased AS Qty, '
          'UnitCost AS "Unit cost", PurchaseDate AS Date FROM View_SupplierPurchaseHistory LIMIT 30'),
         ("Prescription History (by customer)", "View_PrescriptionHistory",
-         "SELECT FirstName || ' ' || LastName AS Customer, PrescriptionDate AS Date, "
+         "SELECT CONCAT(FirstName, ' ', LastName) AS Customer, PrescriptionDate AS Date, "
          "DosageInstructions AS Instructions, Duration, PharmacistName AS Pharmacist "
          "FROM View_PrescriptionHistory LIMIT 30"),
     ]
     for title, view_name, sql in reports:
         st.subheader(title)
-        st.caption(f"SELECT \u2026 FROM {view_name}")
-        rows = database.query(conn, sql)
-        if rows:
-            st.dataframe(rows, use_container_width=True, hide_index=True)
+        st.caption(f"SELECT … FROM {view_name}")
+        df = database.get_dataframe(sql)
+        if not df.empty:
+            st.dataframe(df, use_container_width=True, hide_index=True)
         else:
             st.info("No rows.")
         st.divider()
 
-# Route
+# Router
+
 section = st.session_state.section
 
 if not can_read(st.session_state.role, section):
@@ -425,54 +456,3 @@ elif section == "REPORTS":
     render_reports()
 else:
     render_entity(section)
-
-import base64
-import streamlit as st
-
-def set_local_background(image_file):
-    with open(image_file, "rb") as file:
-        encoded = base64.b64encode(file.read()).decode()
-    
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background: linear-gradient(rgba(14, 17, 23, 0.85), rgba(14, 17, 23, 0.85)), 
-                        url("data:image/png;base64,{encoded}");
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center;
-        }}
-        [data-testid="stSidebar"] {{
-            background-color: rgba(18, 18, 24, 0.88) !important;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-# Load the background image
-set_local_background("bg_pharmacy.jpg")
-
-import streamlit as st
-import pandas as pd
-from sqlalchemy import create_engine
-
-# Initialize connection pool to Railway MariaDB
-@st.cache_resource
-def get_db_engine():
-    db = st.secrets["mysql"]
-    connection_url = (
-        f"mysql+pymysql://{db['username']}:{db['password']}"
-        f"@{db['host']}:{db['port']}/{db['database']}"
-    )
-    return create_engine(connection_url, pool_recycle=3600)
-
-engine = get_db_engine()
-
-# Example helper function to run queries
-def run_query(query):
-    return pd.read_sql(query, con=engine)
-
-
-
