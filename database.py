@@ -16,14 +16,23 @@ from sqlalchemy import create_engine, text
 def get_engine():
     """Returns a single, shared connection engine connected to Railway MariaDB."""
     db = st.secrets["mysql"]
+    
+    # Cast port explicitly to int (Railway public ports are usually 5 digits, e.g. 14283)
+    port = int(db.get("port", 3306))
+    
     connection_url = (
         f"mysql+pymysql://{db['username']}:{db['password']}"
-        f"@{db['host']}:{db['port']}/{db['database']}"
+        f"@{db['host']}:{port}/{db['database']}"
     )
+    
     return create_engine(
         connection_url, 
         pool_recycle=3600, 
-        pool_pre_ping=True
+        pool_pre_ping=True,
+        connect_args={
+            "connect_timeout": 10,
+            "ssl": {"ssl_mode": "PREFERRED"}
+        }
     )
 
 engine = get_engine()
@@ -202,50 +211,4 @@ FROM CUSTOMER c
 JOIN PRESCRIPTION p ON c.CustomerID = p.CustomerID
 JOIN PHARMACIST ph ON p.PharmacistID = ph.PharmacistID
 ORDER BY p.PrescriptionDate DESC;
-"""
-
-TRIGGERS_SQL = """
-DELIMITER //
-
-CREATE TRIGGER trg_BlockExpiredDispense
-BEFORE INSERT ON PRESCRIPTION_ITEM
-FOR EACH ROW
-BEGIN
-  DECLARE exp_date DATE;
-  SELECT ExpiryDate INTO exp_date FROM MEDICINE WHERE MedicineID = NEW.MedicineID;
-  IF exp_date < CURDATE() THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot dispense: this medicine batch has expired';
-  END IF;
-END//
-
-CREATE TRIGGER trg_BlockInsufficientStock
-BEFORE INSERT ON PRESCRIPTION_ITEM
-FOR EACH ROW
-BEGIN
-  DECLARE curr_stock INT;
-  SELECT StockQuantity INTO curr_stock FROM MEDICINE WHERE MedicineID = NEW.MedicineID;
-  IF curr_stock < NEW.Quantity THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot dispense: not enough stock on hand';
-  END IF;
-END//
-
-CREATE TRIGGER trg_AutoUpdateStockOnDispense
-AFTER INSERT ON PRESCRIPTION_ITEM
-FOR EACH ROW
-BEGIN
-  UPDATE MEDICINE SET StockQuantity = StockQuantity - NEW.Quantity WHERE MedicineID = NEW.MedicineID;
-  INSERT INTO AUDIT_LOG (TableName, Action, RecordID, Details)
-  VALUES ('MEDICINE', 'DISPENSE', NEW.MedicineID, CONCAT('Stock reduced by ', NEW.Quantity, ' via prescription #', NEW.PrescriptionID));
-END//
-
-CREATE TRIGGER trg_AutoUpdateStockOnPurchase
-AFTER INSERT ON PURCHASE_ITEM
-FOR EACH ROW
-BEGIN
-  UPDATE MEDICINE SET StockQuantity = StockQuantity + NEW.QuantityPurchased WHERE MedicineID = NEW.MedicineID;
-  INSERT INTO AUDIT_LOG (TableName, Action, RecordID, Details)
-  VALUES ('MEDICINE', 'RESTOCK', NEW.MedicineID, CONCAT('Stock increased by ', NEW.QuantityPurchased, ' via purchase #', NEW.PurchaseID));
-END//
-
-DELIMITER ;
 """
