@@ -454,5 +454,25 @@ def set_local_background(image_file):
 # Load the background image
 set_local_background("bg_pharmacy.jpg")
 
+import streamlit as st
+import pandas as pd
+from sqlalchemy import create_engine
+
+# Initialize connection pool to Railway MariaDB
+@st.cache_resource
+def get_db_engine():
+    db = st.secrets["mysql"]
+    connection_url = (
+        f"mysql+pymysql://{db['username']}:{db['password']}"
+        f"@{db['host']}:{db['port']}/{db['database']}"
+    )
+    return create_engine(connection_url, pool_recycle=3600)
+
+engine = get_db_engine()
+
+# Example helper function to run queries
+def run_query(query):
+    return pd.read_sql(query, con=engine)
+
 
 
