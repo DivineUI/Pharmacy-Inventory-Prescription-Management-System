@@ -1,7 +1,7 @@
 """
 entities.py
 Declarative configuration for the generic CRUD screens, one entry per table.
-Updated for MariaDB compatibility (CONCAT instead of ||).
+Restored for local SQLite compatibility (|| operator for concatenation).
 """
 
 from datetime import date
@@ -155,7 +155,7 @@ ENTITIES = {
         "title": "Prescriptions",
         "desc": "One row per prescription written for a customer by a pharmacist.",
         "list_sql": """SELECT p.PrescriptionID, p.PrescriptionDate, p.DosageInstructions, p.Duration,
-                              CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName, ph.Name AS PharmacistName,
+                              (c.FirstName || ' ' || c.LastName) AS CustomerName, ph.Name AS PharmacistName,
                               p.CustomerID, p.PharmacistID
                        FROM PRESCRIPTION p JOIN CUSTOMER c ON p.CustomerID = c.CustomerID
                        JOIN PHARMACIST ph ON p.PharmacistID = ph.PharmacistID
@@ -173,7 +173,7 @@ ENTITIES = {
         "fields": [
             {"key": "PrescriptionDate", "label": "Prescription date", "type": "date", "required": True},
             {"key": "CustomerID", "label": "Customer", "type": "fk", "fk_entity": "CUSTOMER",
-             "fk_label_sql": "CONCAT(FirstName, ' ', LastName)", "fk_pk": "CustomerID", "required": True},
+             "fk_label_sql": "FirstName || ' ' || LastName", "fk_pk": "CustomerID", "required": True},
             {"key": "PharmacistID", "label": "Pharmacist", "type": "fk", "fk_entity": "PHARMACIST",
              "fk_label_sql": "Name", "fk_pk": "PharmacistID", "required": True},
             {"key": "DosageInstructions", "label": "Dosage instructions", "type": "text"},
@@ -205,9 +205,9 @@ ENTITIES = {
         "no_edit": True,
         "fields": [
             {"key": "PrescriptionID", "label": "Prescription", "type": "fk", "fk_entity": "PRESCRIPTION",
-             "fk_label_sql": "CONCAT('#', PrescriptionID, ' — ', PrescriptionDate)", "fk_pk": "PrescriptionID", "required": True},
+             "fk_label_sql": "'#' || PrescriptionID || ' — ' || PrescriptionDate", "fk_pk": "PrescriptionID", "required": True},
             {"key": "MedicineID", "label": "Medicine (stock shown)", "type": "fk", "fk_entity": "MEDICINE",
-             "fk_label_sql": "CONCAT(MedicineName, '  (', StockQuantity, ' in stock)')", "fk_pk": "MedicineID", "required": True},
+             "fk_label_sql": "MedicineName || '  (' || StockQuantity || ' in stock)'", "fk_pk": "MedicineID", "required": True},
             {"key": "Quantity", "label": "Quantity to dispense", "type": "int", "step": 1, "min": 1, "required": True},
             {"key": "Dosage", "label": "Dosage", "type": "text"},
             {"key": "Frequency", "label": "Frequency", "type": "text"},
@@ -258,7 +258,7 @@ ENTITIES = {
         "no_edit": True,
         "fields": [
             {"key": "PurchaseID", "label": "Purchase order", "type": "fk", "fk_entity": "PURCHASE",
-             "fk_label_sql": "CONCAT('#', PurchaseID, ' — ', PurchaseDate)", "fk_pk": "PurchaseID", "required": True},
+             "fk_label_sql": "'#' || PurchaseID || ' — ' || PurchaseDate", "fk_pk": "PurchaseID", "required": True},
             {"key": "MedicineID", "label": "Medicine", "type": "fk", "fk_entity": "MEDICINE",
              "fk_label_sql": "MedicineName", "fk_pk": "MedicineID", "required": True},
             {"key": "QuantityPurchased", "label": "Quantity received", "type": "int", "step": 1, "min": 1, "required": True},
