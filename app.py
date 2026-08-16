@@ -40,8 +40,18 @@ def set_local_background(image_file):
 
 set_local_background("bg_pharmacy.jpg")
 
-# Session state initialization
+# ==========================================
+# 1. AUTHENTICATION & SESSION INITIALIZATION
+# ==========================================
 
+ROLE_PINS = {
+    "Admin": "1234",
+    "Pharmacist": "5678",
+    "Cashier": "4321"
+}
+
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
 if "role" not in st.session_state:
     st.session_state.role = "Admin"
 if "section" not in st.session_state:
@@ -56,6 +66,27 @@ if "confirm_delete" not in st.session_state:
     st.session_state.confirm_delete = None      # (entity_key, pk)
 if "drill" not in st.session_state:
     st.session_state.drill = None               # ("prescription_items"|"purchase_items", parent_id)
+
+# Show Login Screen if NOT authenticated
+if not st.session_state.authenticated:
+    st.title("℞ PIPMS — Staff Login")
+    st.caption("Please select your role and enter the team PIN to access the pharmacy system.")
+    
+    with st.form("login_form"):
+        selected_role = st.selectbox("Select Your Role", list(ROLE_PINS.keys()))
+        entered_pin = st.text_input("Enter Role PIN", type="password")
+        submit_btn = st.form_submit_button("Log In", type="primary")
+        
+        if submit_btn:
+            if entered_pin == ROLE_PINS[selected_role]:
+                st.session_state.authenticated = True
+                st.session_state.role = selected_role
+                st.success("Login successful!")
+                st.rerun()
+            else:
+                st.error("Incorrect PIN for this role. Please try again.")
+                
+    st.stop()
 
 
 def friendly_sql_error(err: Exception) -> str:
@@ -80,12 +111,12 @@ with st.sidebar:
     st.caption("Pharmacy Inventory & Prescriptions")
     st.divider()
 
-    role = st.selectbox("Signed in as", ROLES, index=ROLES.index(st.session_state.role))
-    if role != st.session_state.role:
-        st.session_state.role = role
-        if not can_read(role, st.session_state.section):
-            st.session_state.section = "DASHBOARD"
+    # Display current role and logout button instead of live role switcher
+    st.write(f"Signed in as **{st.session_state.role}**")
+    if st.button("Log Out", use_container_width=True):
+        st.session_state.authenticated = False
         st.session_state.drill = None
+        st.session_state.form_mode = None
         st.rerun()
 
     access_note = "full access" if st.session_state.role == "Admin" else "scoped access"
